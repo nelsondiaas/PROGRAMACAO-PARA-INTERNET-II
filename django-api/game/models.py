@@ -6,6 +6,6 @@ class Game(models.Model):
     release_date = models.DateTimeField()
     game_category = models.CharField(max_length=200, blank=True, default='')
     played = models.BooleanField(default=False)
-
+    
     class Meta:
         ordering = ('name',)
