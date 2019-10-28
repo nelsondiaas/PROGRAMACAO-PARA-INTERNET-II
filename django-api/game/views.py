@@ -42,10 +42,11 @@ class GameDetail(APIView):
             game_serializer.save()
             return Response(game_serializer.data)
         return Response(game_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
     def delete(self, request, pk, format=None):
+        game_serializer = GameSerializer(data=request.data)
         game = self.get_object(pk)
-        
-        game.delete()
+        if game_serializer.verify_releases(game):
+            game.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
         
