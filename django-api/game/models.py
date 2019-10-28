@@ -10,3 +10,4 @@ class Game(Pattern):
     
     class Meta:
         ordering = ['name']
+        

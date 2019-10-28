@@ -1,11 +1,12 @@
-from django.urls import path
+from django.conf.urls import url
 from game import views
 
 # Router
 
 urlpatterns = [
-    path('api/v1/game', views.game_create),
-    path('api/v1/game/list', views.game_list),
-    path('api/v1/game/<int:id>', views.game_detail)
+    
+    url('api/v1/games/', views.game_create),
+    url('api/v1/games/', views.game_list),
+    url('api/v1/games/<int:id>/', views.game_detail)
 
 ]
