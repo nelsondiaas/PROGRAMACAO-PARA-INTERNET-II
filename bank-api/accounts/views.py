@@ -8,12 +8,11 @@ from accounts.models import Account
 
 # Create your views here.
 
-
 class AccountCreateOrList(APIView):
     
     def post(self, request, format=None):
         account_serializer = AccountSerializer(data=request.data)
-        if account_serializer.is_valid():
+        if account_serializer.verify_balance(account_serializer, request.data):
             account_serializer.save()
             return Response(account_serializer.data, status=status.HTTP_201_CREATED)
         return Response(account_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -35,3 +34,18 @@ class AccountDetail(APIView):
         account = self.get_object(pk)
         account_serializer = AccountSerializer(account)
         return Response(account_serializer.data)
+
+    def put(self, request, pk, format=None):
+        account = self.get_object(pk)
+        account_serializer = AccountSerializer(account, data=request.data)
+        if account_serializer.is_valid():
+            account_serializer.save()
+            return Response(account_serializer.data)
+        return Response(account_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        account_serializer = AccountSerializer(data=request.data)
+        account = self.get_object(pk)
+        if account_serializer.is_valid():
+            account.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
