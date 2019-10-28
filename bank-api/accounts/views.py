@@ -38,7 +38,7 @@ class AccountDetail(APIView):
     def put(self, request, pk, format=None):
         account = self.get_object(pk)
         account_serializer = AccountSerializer(account, data=request.data)
-        if account_serializer.is_valid():
+        if account_serializer.verify_balance(account_serializer, request.data):
             account_serializer.save()
             return Response(account_serializer.data)
         return Response(account_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
