@@ -1,46 +1,51 @@
 from rest_framework.parsers import JSONParser
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from game.serializers import GameSerializer
 from rest_framework import status
+from django.http import Http404
 from game.models import Game
 
 # Create your views here.
 
-@api_view(['POST'])
-def game_create(request):
-     if request.method == 'POST':
+class GameCreateOrList(APIView):
+
+    def post(self, request, format=None):
         game_serializer = GameSerializer(data=request.data)
         if game_serializer.is_valid():
             game_serializer.save()
             return Response(game_serializer.data, status=status.HTTP_201_CREATED)
         return Response(game_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def game_list(request):
-    if request.method == 'GET':
+    def get(self, request, format=None):
+        print("\nGAMECREATEORLIST")
         games = Game.objects.all()
         games_serializer = GameSerializer(games, many=True)
         return Response(games_serializer.data)
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def game_detail(request, id):
-    try:
-        game = Game.objects.get(id=id)
-    except Game.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+class GameDetail(APIView):
 
-    if request.method == 'GET':
+    def get_object(self, pk):
+        try:
+            return Game.objects.get(pk=pk)
+        except Game.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        game = self.get_object(pk)
         game_serializer = GameSerializer(game)
         return Response(game_serializer.data)
 
-    elif request.method == 'PUT':
+    def put(self, request, pk, format=None):
+        game = self.get_object(pk)
         game_serializer = GameSerializer(game, data=request.data)
         if game_serializer.is_valid():
             game_serializer.save()
             return Response(game_serializer.data)
         return Response(game_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
+    def delete(self, request, pk, format=None):
+        game = self.get_object(pk)
         game.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+        
