@@ -9,16 +9,15 @@ from game.models import Game
 # Create your views here.
 
 class GameCreateOrList(APIView):
-
+    
     def post(self, request, format=None):
         game_serializer = GameSerializer(data=request.data)
-        if game_serializer.is_valid():
+        if game_serializer.verify_exists(game_serializer, request.data):
             game_serializer.save()
             return Response(game_serializer.data, status=status.HTTP_201_CREATED)
         return Response(game_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
     def get(self, request, format=None):
-        print("\nGAMECREATEORLIST")
         games = Game.objects.all()
         games_serializer = GameSerializer(games, many=True)
         return Response(games_serializer.data)
@@ -39,13 +38,14 @@ class GameDetail(APIView):
     def put(self, request, pk, format=None):
         game = self.get_object(pk)
         game_serializer = GameSerializer(game, data=request.data)
-        if game_serializer.is_valid():
+        if game_serializer.verify_exists(game_serializer, request.data):
             game_serializer.save()
             return Response(game_serializer.data)
         return Response(game_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         game = self.get_object(pk)
+        
         game.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
         
