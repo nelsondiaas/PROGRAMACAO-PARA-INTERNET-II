@@ -43,6 +43,13 @@ class AccountDetail(APIView):
             return Response(account_serializer.data)
         return Response(account_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request, pk, format=None):
+        account = self.get_object(pk)
+        account_serializer = AccountSerializer(account, data=request.data)
+        if account_serializer.add_credit(account_serializer, request.data, account):
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_202_ACCEPTED)
+
     def delete(self, request, pk, format=None):
         account_serializer = AccountSerializer(data=request.data)
         account = self.get_object(pk)
