@@ -12,7 +12,7 @@ class GameCreateOrList(APIView):
     
     def post(self, request, format=None):
         game_serializer = GameSerializer(data=request.data)
-        if game_serializer.verify_exists(game_serializer, request.data):
+        if game_serializer.verify_exists(game_serializer):
             game_serializer.save()
             return Response(game_serializer.data, status=status.HTTP_201_CREATED)
         return Response(game_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -38,7 +38,7 @@ class GameDetail(APIView):
     def put(self, request, pk, format=None):
         game = self.get_object(pk)
         game_serializer = GameSerializer(game, data=request.data)
-        if game_serializer.verify_exists(game_serializer, request.data):
+        if game_serializer.verify_exists(game_serializer):
             game_serializer.save()
             return Response(game_serializer.data)
         return Response(game_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
