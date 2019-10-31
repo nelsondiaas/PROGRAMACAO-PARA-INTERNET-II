@@ -12,7 +12,7 @@ class AccountCreateOrList(APIView):
     
     def post(self, request, format=None):
         account_serializer = AccountSerializer(data=request.data)
-        if account_serializer.verify_balance(account_serializer, request.data):
+        if account_serializer.verify_balance(account_serializer):
             account_serializer.save()
             return Response(account_serializer.data, status=status.HTTP_201_CREATED)
         return Response(account_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -38,7 +38,7 @@ class AccountDetail(APIView):
     def put(self, request, pk, format=None):
         account = self.get_object(pk)
         account_serializer = AccountSerializer(account, data=request.data)
-        if account_serializer.verify_balance(account_serializer, request.data):
+        if account_serializer.verify_balance(account_serializer):
             account_serializer.save()
             return Response(account_serializer.data)
         return Response(account_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -46,7 +46,7 @@ class AccountDetail(APIView):
     def patch(self, request, pk, format=None):
         account = self.get_object(pk)
         account_serializer = AccountSerializer(account, data=request.data)
-        if account_serializer.add_credit(account_serializer, request.data, account):
+        if account_serializer.add_credit(account_serializer, account):
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_202_ACCEPTED)
 

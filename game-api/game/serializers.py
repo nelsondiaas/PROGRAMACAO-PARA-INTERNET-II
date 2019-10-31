@@ -8,9 +8,9 @@ class GameSerializer(serializers.ModelSerializer):
         model = Game
         fields = ['id', 'name', 'release_date', 'game_category', 'created', 'createdAt', 'updatedAt']
     
-    def verify_exists(self, serializer, data):
+    def verify_exists(self, serializer):
         if serializer.is_valid():
-            exists = Game.objects.filter(name=data['name']).exists()
+            exists = Game.objects.filter(name=serializer.validated_data['name']).exists()
             if exists: raise serializers.ValidationError("That name already exists!")
             return True
 

@@ -6,30 +6,30 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ['id', 'owner', 'balance', 'creation_date', 'createdAt', 'updatedAt']
     
-    def verify_balance(self, serializer, data):
-        if self.verify_date(data):
-            if serializer.is_valid():
-                if data['balance'] < 0:
+    def verify_balance(self, serializer):
+         if serializer.is_valid():
+            if self.verify_date(serializer):
+                if serializer.validated_data['balance'] < 0:
                     raise serializers.ValidationError("Negative balance")
                 return True
 
-    def verify_date(self, data):
+    def verify_date(self, serializer):
         try:
-            if data['creation_date']:
+            if serializer.validated_data['creation_date']:
                 raise serializers.ValidationError("Date cannot be applied")
         except KeyError:
             return True
 
-    def add_credit(self, serializer, data, instance):
+    def add_credit(self, serializer, instance):
         if serializer.is_valid():
-            if data['balance'] == 0:
+            if serializer.validated_data['balance'] == 0:
                 raise serializers.ValidationError("Value is zero, operation denied")
-            elif data['balance'] > 0:
-                instance.balance += data['balance']
+            elif serializer.validated_data['balance'] > 0:
+                instance.balance += serializer.validated_data['balance']
                 instance.save()
                 return True
             else:   
-                instance.balance += data['balance']
+                instance.balance += serializer.validated_data['balance']
                 if instance.balance > 0:
                     instance.save()
                     return False
