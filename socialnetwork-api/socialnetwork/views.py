@@ -62,4 +62,7 @@ class ProfileDetail(APIView):
         profile_serializer = ProfileSerializer(profile)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
-        
+    def delete(self, request, pk, format=None):
+        profile = self.get_object(pk)
+        profile.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

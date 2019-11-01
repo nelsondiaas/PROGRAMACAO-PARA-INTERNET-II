@@ -21,7 +21,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Profile
-        fields = ['name', 'email', 'address']
+        fields = ['pk', 'name', 'email', 'address']
 
     def create(self, validated_data):
         request_address = validated_data.pop('address')
