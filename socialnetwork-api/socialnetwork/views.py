@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import *
+from .models import *
 
 class FileLoad(APIView):
 
@@ -34,5 +35,31 @@ class FileLoad(APIView):
         
         return Response(status=status.HTTP_201_CREATED)
 
-            
+class ProfileCreateOrList(APIView):
 
+    def get(self, request, format=None):
+        profiles = Profile.objects.all()
+        profile_serializer = ProfileSerializer(profiles, many=True)
+        return Response(profile_serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        profile_serializer = ProfileSerializer(data=request.data)
+        if profile_serializer.is_valid():
+            profile_serializer.save()
+            return Response(profile_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ProfileDetail(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Profile.objects.get(pk=pk)
+        except Profile.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        profile = self.get_object(pk)
+        profile_serializer = ProfileSerializer(profile)
+        return Response(profile_serializer.data, status=status.HTTP_200_OK)
+
+        

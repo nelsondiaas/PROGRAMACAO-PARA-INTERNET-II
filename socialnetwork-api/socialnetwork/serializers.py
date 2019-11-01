@@ -11,13 +11,24 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['postId', 'name', 'email', 'body']
 
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ['name', 'email','address']
-
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = ['street', 'suite', 'city', 'zipcode']
+
+class ProfileSerializer(serializers.ModelSerializer):
+    address = AddressSerializer()
+    
+    class Meta:
+        model = Profile
+        fields = ['name', 'email', 'address']
+
+    def create(self, validated_data):
+        request_address = validated_data.pop('address')
+        address = Address.objects.create(**request_address)
+        return Profile.objects.create(address=address ,**validated_data)
+     
+        
+
+
 
