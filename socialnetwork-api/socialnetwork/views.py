@@ -99,3 +99,17 @@ class CommentCreateOrList(APIView):
         comment = self.get_object(pk)
         comment_serializer = CommentSerializer(comment, many=True)
         return Response(comment_serializer.data, status=status.HTTP_200_OK)
+
+class CommentDetail(APIView):
+
+    def get_object(self, pk_post, pk_comment):
+        try:
+            comments = Comment.objects.filter(postId=pk_post)
+            return comments.get(pk=pk_comment)
+        except Comment.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk_post, pk_comment, format=None):
+        comment = self.get_object(pk_post, pk_comment)
+        comment_serializer = CommentSerializer(comment)
+        return Response(comment_serializer.data, status=status.HTTP_200_OK)
