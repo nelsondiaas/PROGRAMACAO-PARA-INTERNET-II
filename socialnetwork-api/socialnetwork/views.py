@@ -5,37 +5,6 @@ from .serializers import *
 from .models import *
 import json
 
-class FileLoad(APIView):
-
-    def post(self, request, format=None):
-        profiles = request.data['users']
-        posts = request.data['posts']
-        comments = request.data['comments']
-
-        for profile in profiles:
-            address = profile['address']
-            address_serializer = AddressSerializer(data=address)
-            if address_serializer.is_valid():
-                address_serializer.save()
-
-            new_profile = profile
-            new_profile['address'] = profile['id']
-            profile_serializer = ProfileSerializer(data=new_profile)
-            if profile_serializer.is_valid():
-                profile_serializer.save()
-
-        for post in posts:
-            post_serializer = PostSerializer(data=post)
-            if post_serializer.is_valid():
-                post_serializer.save()
-
-        for comment in comments:
-            comment_serializer = CommentSerializer(data=comment)
-            if comment_serializer.is_valid():
-                comment_serializer.save()
-        
-        return Response(status=status.HTTP_201_CREATED)
-
 class ProfileCreateOrList(APIView):
 
     def get(self, request, format=None):
@@ -70,7 +39,7 @@ class ProfileDetail(APIView):
             profile_serializer.save()
             return Response(profile_serializer.data, status=status.HTTP_200_OK)
         return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def delete(self, request, pk, format=None):
         profile = self.get_object(pk)
         profile.delete()
@@ -132,10 +101,13 @@ class CommentDetail(APIView):
     '''
     def post(self, request, format=None):
         post = self.get_post(request.data['postId'])
-        print("\nTESTS: ", )
+        request.data['postId'] = post.__dict__
+        profile = Profile.objects.get(pk=request.data['postId']['userId_id'])
+        request.data['postId']['userId_id'] = profile.__dict__
+        print(request.data)
         comment_serializer = CommentSerializer(data=request.data)
         if comment_serializer.is_valid():
-            post_serializer.save()
+            comment_serializer.save()
             return Response(comment_serializer.data, status=status.HTTP_201_CREATED)
         return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     '''
