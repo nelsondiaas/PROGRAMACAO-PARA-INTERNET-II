@@ -3,7 +3,6 @@ from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import *
 from .models import *
-import json
 
 class ProfileCreateOrList(APIView):
 
@@ -48,35 +47,51 @@ class ProfileDetail(APIView):
 class ProfilePost(APIView):
 
     def get(self, request, format=None):
-        post = Post.objects.all()
-        post_serializer = PostSerializer(post, many=True)
-        return Response(post_serializer.data, status=status.HTTP_200_OK)
+        profiles = Profile.objects.all()
+        profile_serializer = ProfileListPostSerializer(profiles, many=True)
+        return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
 class ProfilePostDetail(APIView):
     
     def get_object(self, pk):
         try:
-            return Post.objects.get(pk=pk)
-        except Post.DoesNotExist:
+            return Profile.objects.get(pk=pk)
+        except Profile.DoesNotExist:
             raise Http404
             
     def get(self, request, pk, format=None):
-        post = self.get_object(pk)
-        post_serializer = PostSerializer(post)
+        profile = self.get_object(pk)
+        profile_serializer = ProfileListPostSerializer(profile, many=False)
+        return Response(profile_serializer.data, status=status.HTTP_200_OK)
+
+class PostCreteOrListWithComment(APIView):
+    def get(self, request, format=None):
+        post = Post.objects.all()
+        post_serializer = PostListCommentSerializer(post, many=True)
         return Response(post_serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        pass
 
 class CommentCreateOrList(APIView):
 
     def get_object(self, pk):
         try:
-            return Comment.objects.filter(postId=pk)
-        except Comment.DoesNotExist:
+            return Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
             raise Http404
-        
+    
     def get(self, request, pk, format=None):
-        comment = self.get_object(pk)
-        comment_serializer = CommentSerializer(comment, many=True)
+        post = self.get_object(pk)
+        comment_serializer = CommentSerializer(post.comments, many=True)
         return Response(comment_serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, pk, format=None):
+        comment_serializer = CommentSerializer(data=request.data)
+        if comment_serializer.is_valid():
+            comment_serializer.save()
+            return Response(comment_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CommentDetail(APIView):
 
@@ -86,28 +101,9 @@ class CommentDetail(APIView):
             return comments.get(pk=pk_comment)
         except Comment.DoesNotExist:
             raise Http404
-    
-    def get_post(self, post_id):
-        try:
-            return Post.objects.get(pk=post_id)
-        except Post.DoesNotExist:
-            raise Http404
-
+        
     def get(self, request, pk_post, pk_comment, format=None):
         comment = self.get_comment(pk_post, pk_comment)
         comment_serializer = CommentSerializer(comment)
         return Response(comment_serializer.data, status=status.HTTP_200_OK)
 
-    '''
-    def post(self, request, format=None):
-        post = self.get_post(request.data['postId'])
-        request.data['postId'] = post.__dict__
-        profile = Profile.objects.get(pk=request.data['postId']['userId_id'])
-        request.data['postId']['userId_id'] = profile.__dict__
-        print(request.data)
-        comment_serializer = CommentSerializer(data=request.data)
-        if comment_serializer.is_valid():
-            comment_serializer.save()
-            return Response(comment_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    '''

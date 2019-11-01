@@ -25,6 +25,7 @@ def run():
         if comment_serializer.is_valid():
             comment_serializer.save()
 
+    print("\nPopulated database!")
 
 
 
