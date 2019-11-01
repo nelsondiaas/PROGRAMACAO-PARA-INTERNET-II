@@ -17,7 +17,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         request_address = validated_data.pop('address')
         address = Address.objects.create(**request_address)
         return Profile.objects.create(address=address ,**validated_data)
-
+    
     def update(self, instance, validated_data):
         address_data = validated_data.pop('address')
         address = instance.address
@@ -42,14 +42,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class ProfileListPostSerializer(serializers.ModelSerializer):
     posts = PostSerializer(many=True, read_only=True)
-    
     class Meta:
         model = Profile
         fields = ['name', 'email', 'posts']
 
 class PostListCommentSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
-    
     class Meta:
         model = Post
         fields = ['userId', 'title', 'body', 'comments']

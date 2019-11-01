@@ -121,3 +121,11 @@ class CommentDetail(APIView):
         comment_serializer = CommentSerializer(comment, many=False)
         return Response(comment_serializer.data, status=status.HTTP_200_OK)
 
+    def put(self, request, pk_post, pk_comment, format=None):
+        comment = self.get_comment(pk_post, pk_comment)
+        request.data['postId'] = pk_post
+        comment_serializer = CommentSerializer(comment, data=request.data)
+        if comment_serializer.is_valid():
+            comment_serializer.save()
+            return Response(comment_serializer.data, status=status.HTTP_200_OK)
+        return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
