@@ -64,14 +64,23 @@ class ProfilePostDetail(APIView):
         profile_serializer = ProfileListPostSerializer(profile, many=False)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
-class PostCreteOrListWithComment(APIView):
+class PostListWithComment(APIView):
     def get(self, request, format=None):
         post = Post.objects.all()
         post_serializer = PostListCommentSerializer(post, many=True)
         return Response(post_serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, format=None):
-        pass
+class PostListWithCommentDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        post = self.get_object(pk)
+        post_serializer = PostListCommentSerializer(post, many=False)
+        return Response(post_serializer.data, status=status.HTTP_200_OK)
 
 class CommentCreateOrList(APIView):
 
