@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from django.http import Http404
 from .serializers import *
 from .models import *
 
@@ -107,13 +108,16 @@ class CommentDetail(APIView):
 
     def get_comment(self, pk_post, pk_comment):
         try:
-            comments = Comment.objects.filter(postId=pk_post)
-            return comments.get(pk=pk_comment)
-        except Comment.DoesNotExist:
+            post = Comment.objects.filter(postId=pk_post)
+            try:
+                return post.get(pk=pk_comment)
+            except Comment.DoesNotExist:
+                raise Http404
+        except Post.DoesNotExist:
             raise Http404
         
     def get(self, request, pk_post, pk_comment, format=None):
         comment = self.get_comment(pk_post, pk_comment)
-        comment_serializer = CommentSerializer(comment)
+        comment_serializer = CommentSerializer(comment, many=False)
         return Response(comment_serializer.data, status=status.HTTP_200_OK)
 
