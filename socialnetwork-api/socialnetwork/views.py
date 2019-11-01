@@ -68,8 +68,21 @@ class ProfileDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class ProfilePost(APIView):
-    
+
     def get(self, request, format=None):
         post = Post.objects.all()
         post_serializer = PostSerializer(post, many=True)
+        return Response(post_serializer.data, status=status.HTTP_200_OK)
+
+class ProfilePostDetail(APIView):
+    
+    def get_object(self, pk):
+        try:
+            return Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            raise Http404
+            
+    def get(self, request, pk, format=None):
+        post = self.get_object(pk)
+        post_serializer = PostSerializer(post)
         return Response(post_serializer.data, status=status.HTTP_200_OK)
