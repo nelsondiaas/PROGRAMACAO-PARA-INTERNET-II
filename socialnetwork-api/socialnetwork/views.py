@@ -66,3 +66,10 @@ class ProfileDetail(APIView):
         profile = self.get_object(pk)
         profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ProfilePost(APIView):
+    
+    def get(self, request, format=None):
+        post = Post.objects.all()
+        post_serializer = PostSerializer(post, many=True)
+        return Response(post_serializer.data, status=status.HTTP_200_OK)
