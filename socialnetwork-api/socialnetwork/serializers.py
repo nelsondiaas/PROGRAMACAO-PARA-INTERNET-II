@@ -20,12 +20,14 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     userId = ProfileSerializer()
-
+    
     class Meta:
         model = Post
         fields = ['userId', 'title', 'body']
 
 class CommentSerializer(serializers.ModelSerializer):
+    postId = PostSerializer()
+    
     class Meta:
         model = Comment
         fields = ['postId', 'name', 'email', 'body']

@@ -86,3 +86,16 @@ class ProfilePostDetail(APIView):
         post = self.get_object(pk)
         post_serializer = PostSerializer(post)
         return Response(post_serializer.data, status=status.HTTP_200_OK)
+
+class CommentCreateOrList(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Comment.objects.filter(postId=pk)
+        except Comment.DoesNotExist:
+            raise Http404
+        
+    def get(self, request, pk, format=None):
+        comment = self.get_object(pk)
+        comment_serializer = CommentSerializer(comment, many=True)
+        return Response(comment_serializer.data, status=status.HTTP_200_OK)
