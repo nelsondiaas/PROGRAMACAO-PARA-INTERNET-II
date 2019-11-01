@@ -1,7 +1,5 @@
 from rest_framework import serializers
 from socialnetwork.models import *
-from rest_framework import serializers
-
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
