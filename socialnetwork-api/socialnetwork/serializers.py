@@ -18,9 +18,21 @@ class ProfileSerializer(serializers.ModelSerializer):
         address = Address.objects.create(**request_address)
         return Profile.objects.create(address=address ,**validated_data)
 
+    def update(self, instance, validated_data):
+        address_data = validated_data.pop('address')
+        address = instance.address
+        instance.name = validated_data.get('name', instance.name)
+        instance.email = validated_data.get('email', instance.email)
+        address.street = address_data.get('street', address.street)
+        address.suite = address_data.get('city', address.suite)
+        address.zipcode = address_data.get('zipcode', address.zipcode)
+        instance.save()
+        address.save()
+        return instance
+
 class PostSerializer(serializers.ModelSerializer):
     userId = ProfileSerializer()
-    
+
     class Meta:
         model = Post
         fields = ['userId', 'title', 'body']
@@ -32,8 +44,6 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['postId', 'name', 'email', 'body']
 
-     
-        
-
-
+    def create(self, validated_data):
+        print("\nTESTS: ", validated_data)
 

@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import *
 from .models import *
+import json
 
 class FileLoad(APIView):
 
@@ -62,6 +63,14 @@ class ProfileDetail(APIView):
         profile_serializer = ProfileSerializer(profile)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
+    def put(self, request, pk, format=None):
+        profile = self.get_object(pk)
+        profile_serializer = ProfileSerializer(profile, data=request.data)
+        if profile_serializer.is_valid():
+            profile_serializer.save()
+            return Response(profile_serializer.data, status=status.HTTP_200_OK)
+        return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     def delete(self, request, pk, format=None):
         profile = self.get_object(pk)
         profile.delete()
@@ -102,14 +111,31 @@ class CommentCreateOrList(APIView):
 
 class CommentDetail(APIView):
 
-    def get_object(self, pk_post, pk_comment):
+    def get_comment(self, pk_post, pk_comment):
         try:
             comments = Comment.objects.filter(postId=pk_post)
             return comments.get(pk=pk_comment)
         except Comment.DoesNotExist:
             raise Http404
+    
+    def get_post(self, post_id):
+        try:
+            return Post.objects.get(pk=post_id)
+        except Post.DoesNotExist:
+            raise Http404
 
     def get(self, request, pk_post, pk_comment, format=None):
-        comment = self.get_object(pk_post, pk_comment)
+        comment = self.get_comment(pk_post, pk_comment)
         comment_serializer = CommentSerializer(comment)
         return Response(comment_serializer.data, status=status.HTTP_200_OK)
+
+    '''
+    def post(self, request, format=None):
+        post = self.get_post(request.data['postId'])
+        print("\nTESTS: ", )
+        comment_serializer = CommentSerializer(data=request.data)
+        if comment_serializer.is_valid():
+            post_serializer.save()
+            return Response(comment_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    '''
