@@ -47,10 +47,25 @@ class ProfileDetail(APIView):
 
 class ProfilePost(APIView):
 
+    def get_object(self, pk):
+        try:
+            return Profile.objects.get(pk=pk)
+        except Profile.DoesNotExist:
+            raise Http404
+
     def get(self, request, format=None):
         profiles = Profile.objects.all()
         profile_serializer = ProfileListPostSerializer(profiles, many=True)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request, pk, format=None):
+        self.get_object(pk)
+        request.data['userId'] = pk
+        profile_serializer = PostSerializer(data=request.data)
+        if profile_serializer.is_valid():
+            profile_serializer.save()
+            return Response(profile_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProfilePostDetail(APIView):
     
@@ -129,3 +144,17 @@ class CommentDetail(APIView):
             comment_serializer.save()
             return Response(comment_serializer.data, status=status.HTTP_200_OK)
         return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AmountPostAndCommentFromProfile(APIView):
+
+    def get(self, request, format=None):
+        profiles = Profile.objects.all()
+       
+        profiles_detail = []
+        
+        for profile in profiles:
+            print("profile: ", profile.pk)
+            amount_post = Post.objects.filter(userId=profile.pk)
+            print("\nQnt_post: ", len(amount_post))
+        
+        return Response(status=status.HTTP_200_OK)
