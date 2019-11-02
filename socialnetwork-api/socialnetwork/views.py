@@ -5,9 +5,11 @@ from django.http import Http404
 from .serializers import *
 from .models import *
 
+
 class ProfileCreateOrList(APIView):
 
     def get(self, request, format=None):
+
         profiles = Profile.objects.all()
         profile_serializer = ProfileSerializer(profiles, many=True)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
@@ -81,12 +83,14 @@ class ProfilePostDetail(APIView):
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
 class PostListWithComment(APIView):
+
     def get(self, request, format=None):
         post = Post.objects.all()
         post_serializer = PostListCommentSerializer(post, many=True)
         return Response(post_serializer.data, status=status.HTTP_200_OK)
 
 class PostListWithCommentDetail(APIView):
+
     def get_object(self, pk):
         try:
             return Post.objects.get(pk=pk)
@@ -165,3 +169,18 @@ class AmountPostAndCommentFromProfile(APIView):
             profiles_detail.append(info)
         
         return Response(profiles_detail, status=status.HTTP_200_OK)
+
+class Root(APIView):
+
+    def get(self, request, format=None):
+
+        port = 8000
+
+        data = {
+
+            "profiles": "http://localhost:{}/api/v1/profiles/".format(port),
+            "posts": "http://localhost:{}/api/v1/profiles-posts/".format(port),
+            "comments": "http://localhost:{}/api/v1/posts-comments/".format(port)
+        }
+        
+        return Response(data, status=status.HTTP_200_OK)
