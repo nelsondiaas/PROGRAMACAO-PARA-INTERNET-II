@@ -153,8 +153,15 @@ class AmountPostAndCommentFromProfile(APIView):
         profiles_detail = []
         
         for profile in profiles:
-            print("profile: ", profile.pk)
+            info = {}
             amount_post = Post.objects.filter(userId=profile.pk)
-            print("\nQnt_post: ", len(amount_post))
+            info['pk'] = profile.pk
+            info['name'] = profile.name
+            info['amount_posts'] = len(amount_post)
+            info['amount_comments'] = 0
+            for post in amount_post:
+                amount_comment = Comment.objects.filter(postId=post.pk)
+                info['amount_comments'] += len(amount_comment)
+            profiles_detail.append(info)
         
-        return Response(status=status.HTTP_200_OK)
+        return Response(profiles_detail, status=status.HTTP_200_OK)
