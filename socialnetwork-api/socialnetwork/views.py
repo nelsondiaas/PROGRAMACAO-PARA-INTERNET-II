@@ -1,4 +1,5 @@
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework import status
 from django.http import Http404
@@ -9,7 +10,6 @@ from .models import *
 class ProfileCreateOrList(APIView):
 
     def get(self, request, format=None):
-
         profiles = Profile.objects.all()
         profile_serializer = ProfileSerializer(profiles, many=True)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
@@ -170,17 +170,16 @@ class AmountPostAndCommentFromProfile(APIView):
         
         return Response(profiles_detail, status=status.HTTP_200_OK)
 
-class Root(APIView):
+class ApiRoot(APIView):
 
-    def get(self, request, format=None):
-
-        port = 8000
+    def get(self, request, *args, **kwargs):
 
         data = {
 
-            "profiles": "http://localhost:{}/api/v1/profiles/".format(port),
-            "posts": "http://localhost:{}/api/v1/profiles-posts/".format(port),
-            "comments": "http://localhost:{}/api/v1/posts-comments/".format(port)
+            'profile': reverse('profile-list', request=request),
+            'profile-posts': reverse('profile-posts', request=request),
+            'posts-comments': reverse('posts-comments', request=request),
+            'profiles-detail-posts-comments': reverse('profiles-detail-posts-comments', request=request),
         }
-        
+
         return Response(data, status=status.HTTP_200_OK)
