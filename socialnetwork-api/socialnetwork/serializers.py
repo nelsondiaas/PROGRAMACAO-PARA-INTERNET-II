@@ -40,12 +40,18 @@ class ProfileSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['userId', 'title', 'body']
+        fields = ['pk', 'userId', 'title', 'body']
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.body = validated_data.get('body', instance.body)
+        instance.save()
+        return instance
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ['id', 'postId', 'name', 'email', 'body']
+        fields = ['pk', 'postId', 'name', 'email', 'body']
 
 class ProfileListPostSerializer(serializers.ModelSerializer):
     posts = PostSerializer(many=True, read_only=True)

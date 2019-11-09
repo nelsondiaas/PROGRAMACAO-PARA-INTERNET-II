@@ -75,14 +75,8 @@ class ProfileDetail(APIView):
 
 class PostList(APIView):
 
-    permission_classes = [IsProfileOrReadOnly]
+    permission_classes = [PostIsOwnerOrReadOnly]
 
-    def get_object(self, pk):
-        try:
-            return Profile.objects.get(pk=pk)
-        except Profile.DoesNotExist:
-            raise Http404
-        
     def get(self, request, format=None):
         profiles = Profile.objects.all()
         profile_serializer = ProfileListPostSerializer(profiles, many=True)
@@ -90,21 +84,21 @@ class PostList(APIView):
     
 class PostDetail(APIView):
     
-    permission_classes = [IsProfileOrReadOnly]
+    permission_classes = [PostIsOwnerOrReadOnly]
 
-    def get_object(self, pk):
+    def get_object(self, obj, pk):
         try:
-            return Profile.objects.get(pk=pk)
-        except Profile.DoesNotExist:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
             raise Http404
     
     def get(self, request, pk, format=None):
-        profile = self.get_object(pk)
+        profile = self.get_object(Profile, pk)
         profile_serializer = ProfileListPostSerializer(profile, many=False)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, pk, format=None):
-        self.get_object(pk)
+        self.get_object(Profile, pk)
         request.data['userId'] = pk
         profile_serializer = PostSerializer(data=request.data)
         if profile_serializer.is_valid():
@@ -112,9 +106,19 @@ class PostDetail(APIView):
             return Response(profile_serializer.data, status=status.HTTP_201_CREATED)
         return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def put(self, request, pk, format=None):
+        post = self.get_object(Post, pk)
+        request.data['userId'] = post.userId_id
+        request.data['pk'] = pk
+        profile_serializer = PostSerializer(post, data=request.data)
+        if profile_serializer.is_valid():
+            profile_serializer.save()
+            return Response(profile_serializer.data, status=status.HTTP_200_OK)
+        return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class CommentList(APIView):
-    
-    permission_classes = [IsProfileOrReadOnly]
+
+    permission_classes = [CommentIsOwnerOrReadOnly]
 
     def get(self, request, format=None):
         post = Post.objects.all()
@@ -123,7 +127,7 @@ class CommentList(APIView):
 
 class PostListWithCommentDetail(APIView):
 
-    permission_classes = [IsProfileOrReadOnly]
+    permission_classes = [CommentIsOwnerOrReadOnly]
 
     def get_object(self, pk):
         try:
@@ -138,7 +142,7 @@ class PostListWithCommentDetail(APIView):
 
 class CommentCreateOrList(APIView):
 
-    permission_classes = [IsProfileOrReadOnly]
+    permission_classes = [CommentIsOwnerOrReadOnly]
 
     def get_object(self, pk):
         try:
@@ -161,7 +165,7 @@ class CommentCreateOrList(APIView):
 
 class CommentDetail(APIView):
 
-    permission_classes = [IsProfileOrReadOnly]
+    permission_classes = [CommentIsOwnerOrReadOnly]
 
     def get_comment(self, pk_post, pk_comment):
         try:

@@ -15,7 +15,7 @@ urlpatterns = [
 
     path('api/v1/posts-comments/', CommentList.as_view(), name='comments-list'),
     path('api/v1/posts-comments/<int:pk>/', PostListWithCommentDetail.as_view()),
-
+    
     path('api/v1/posts/<int:pk>/comments/', CommentCreateOrList.as_view()),
     path('api/v1/posts/<int:pk_post>/comments/<int:pk_comment>/', CommentDetail.as_view()),
 
