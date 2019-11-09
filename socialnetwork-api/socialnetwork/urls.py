@@ -1,9 +1,13 @@
-from django.urls import path
+from django.urls import path, include
 from .views import *
 
 urlpatterns = [
     
-    path('api/v1/profiles/', ProfileCreateOrList.as_view(), name='profile-list'),
+    path('api-token/', CustomAuthToken.as_view(), name='api-token'),
+
+    path('api/v1/users/', UserList.as_view(), name='users-list'),
+
+    path('api/v1/profiles/', ProfileList.as_view(), name='profile-list'),
     path('api/v1/profiles/<int:pk>/', ProfileDetail.as_view()),
 
     path('api/v1/profiles-posts/', ProfilePost.as_view(), name='profile-posts'),

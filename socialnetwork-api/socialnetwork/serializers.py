@@ -58,3 +58,4 @@ class PostListCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ['userId', 'title', 'body', 'comments']
+

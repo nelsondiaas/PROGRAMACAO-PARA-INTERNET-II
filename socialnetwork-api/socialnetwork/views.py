@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.http import Http404
 from .serializers import *
+from .permissions import *
 from .models import *
 
 User = get_user_model()
@@ -17,29 +18,36 @@ class ApiRoot(APIView):
 
         data = {
 
-            'profile': reverse('profile-list', request=request),
-            'profile-posts': reverse('profile-posts', request=request),
+            'users': reverse('users-list', request=request),
+            'profiles': reverse('profile-list', request=request),
+            'profiles-posts': reverse('profile-posts', request=request),
             'posts-comments': reverse('posts-comments', request=request),
-            'profiles-detail-posts-comments': reverse('profiles-detail-posts-comments', request=request),
+            'profiles-detail': reverse('profiles-detail-posts-comments', request=request),
         }
 
         return Response(data, status=status.HTTP_200_OK)
 
-class ProfileCreateOrList(APIView):
+class UserList(APIView):
+
+    permission_classes = [IsUserOrReadOnly]
+
+    def get(self, request, format=None):
+        user = User.objects.all()
+        user_serializer = UserSerializer(user, many=True)
+        return Response(user_serializer.data, status=status.HTTP_200_OK)
+
+class ProfileList(APIView):
+
+    permission_classes = [IsProfileOrReadOnly]
 
     def get(self, request, format=None):
         profiles = Profile.objects.all()
         profile_serializer = ProfileSerializer(profiles, many=True)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, format=None):
-        profile_serializer = ProfileSerializer(data=request.data)
-        if profile_serializer.is_valid():
-            profile_serializer.save()
-            return Response(profile_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 class ProfileDetail(APIView):
+
+    permission_classes = [IsProfileOrReadOnly]
 
     def get_object(self, pk):
         try:
@@ -67,6 +75,8 @@ class ProfileDetail(APIView):
 
 class ProfilePost(APIView):
 
+    permission_classes = [IsProfileOrReadOnly]
+
     def get_object(self, pk):
         try:
             return Profile.objects.get(pk=pk)
@@ -89,6 +99,8 @@ class ProfilePost(APIView):
 
 class ProfilePostDetail(APIView):
     
+    permission_classes = [IsProfileOrReadOnly]
+
     def get_object(self, pk):
         try:
             return Profile.objects.get(pk=pk)
@@ -102,12 +114,16 @@ class ProfilePostDetail(APIView):
 
 class PostListWithComment(APIView):
 
+    permission_classes = [IsProfileOrReadOnly]
+
     def get(self, request, format=None):
         post = Post.objects.all()
         post_serializer = PostListCommentSerializer(post, many=True)
         return Response(post_serializer.data, status=status.HTTP_200_OK)
 
 class PostListWithCommentDetail(APIView):
+
+    permission_classes = [IsProfileOrReadOnly]
 
     def get_object(self, pk):
         try:
@@ -121,6 +137,8 @@ class PostListWithCommentDetail(APIView):
         return Response(post_serializer.data, status=status.HTTP_200_OK)
 
 class CommentCreateOrList(APIView):
+
+    permission_classes = [IsProfileOrReadOnly]
 
     def get_object(self, pk):
         try:
@@ -142,6 +160,8 @@ class CommentCreateOrList(APIView):
         return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CommentDetail(APIView):
+
+    permission_classes = [IsProfileOrReadOnly]
 
     def get_comment(self, pk_post, pk_comment):
         try:
@@ -169,6 +189,8 @@ class CommentDetail(APIView):
 
 class AmountPostAndCommentFromProfile(APIView):
 
+    permission_classes = [IsAmountPostAndCommentFromProfileOrReadOnly]
+
     def get(self, request, format=None):
         profiles = Profile.objects.all()
        
@@ -189,7 +211,7 @@ class AmountPostAndCommentFromProfile(APIView):
         return Response(profiles_detail, status=status.HTTP_200_OK)
 
 class CustomAuthToken(ObtainAuthToken):
-    
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
 
