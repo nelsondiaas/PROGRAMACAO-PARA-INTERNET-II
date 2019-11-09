@@ -1,5 +1,8 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from socialnetwork.models import *
+
+User = get_user_model()
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,9 +17,13 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['name', 'email', 'address']
 
     def create(self, validated_data):
+        name = validated_data['name'].split(" ")[0]
+        email = validated_data['email']
+        password = 'admin@123'
         request_address = validated_data.pop('address')
+        new_user = User.objects.create_user(username=name, email=email, password=password)
         address = Address.objects.create(**request_address)
-        return Profile.objects.create(address=address ,**validated_data)
+        return Profile.objects.create(user=new_user, address=address, **validated_data)
     
     def update(self, instance, validated_data):
         address_data = validated_data.pop('address')

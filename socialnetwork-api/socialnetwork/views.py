@@ -1,3 +1,6 @@
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
@@ -6,6 +9,21 @@ from django.http import Http404
 from .serializers import *
 from .models import *
 
+User = get_user_model()
+
+class ApiRoot(APIView):
+
+    def get(self, request, *args, **kwargs):
+
+        data = {
+
+            'profile': reverse('profile-list', request=request),
+            'profile-posts': reverse('profile-posts', request=request),
+            'posts-comments': reverse('posts-comments', request=request),
+            'profiles-detail-posts-comments': reverse('profiles-detail-posts-comments', request=request),
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
 
 class ProfileCreateOrList(APIView):
 
@@ -170,16 +188,12 @@ class AmountPostAndCommentFromProfile(APIView):
         
         return Response(profiles_detail, status=status.HTTP_200_OK)
 
-class ApiRoot(APIView):
+class CustomAuthToken(ObtainAuthToken):
+    
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
 
-    def get(self, request, *args, **kwargs):
-
-        data = {
-
-            'profile': reverse('profile-list', request=request),
-            'profile-posts': reverse('profile-posts', request=request),
-            'posts-comments': reverse('posts-comments', request=request),
-            'profiles-detail-posts-comments': reverse('profiles-detail-posts-comments', request=request),
-        }
-
-        return Response(data, status=status.HTTP_200_OK)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key,'user_id': user.pk,'email': user.email})
