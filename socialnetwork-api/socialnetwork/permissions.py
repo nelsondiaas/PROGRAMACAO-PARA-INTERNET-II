@@ -10,7 +10,7 @@ class IsUserOrReadOnly(permissions.BasePermission):
             return True
         else:
             return obj.user == request.user
-   
+
 class IsProfileOrReadOnly(permissions.BasePermission):
     
     def has_permission(self, request, view):

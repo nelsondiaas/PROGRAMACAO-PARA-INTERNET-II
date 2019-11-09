@@ -19,9 +19,9 @@ class ApiRoot(APIView):
         data = {
 
             'users': reverse('users-list', request=request),
-            'profiles': reverse('profile-list', request=request),
-            'profiles-posts': reverse('profile-posts', request=request),
-            'posts-comments': reverse('posts-comments', request=request),
+            'profiles': reverse('profiles-list', request=request),
+            'profiles-posts': reverse('posts-list', request=request),
+            'posts-comments': reverse('comments-list', request=request),
             'profiles-detail': reverse('profiles-detail-posts-comments', request=request),
         }
 
@@ -73,7 +73,7 @@ class ProfileDetail(APIView):
         profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class ProfilePost(APIView):
+class PostList(APIView):
 
     permission_classes = [IsProfileOrReadOnly]
 
@@ -82,12 +82,27 @@ class ProfilePost(APIView):
             return Profile.objects.get(pk=pk)
         except Profile.DoesNotExist:
             raise Http404
-
+        
     def get(self, request, format=None):
         profiles = Profile.objects.all()
         profile_serializer = ProfileListPostSerializer(profiles, many=True)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
     
+class PostDetail(APIView):
+    
+    permission_classes = [IsProfileOrReadOnly]
+
+    def get_object(self, pk):
+        try:
+            return Profile.objects.get(pk=pk)
+        except Profile.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        profile = self.get_object(pk)
+        profile_serializer = ProfileListPostSerializer(profile, many=False)
+        return Response(profile_serializer.data, status=status.HTTP_200_OK)
+
     def post(self, request, pk, format=None):
         self.get_object(pk)
         request.data['userId'] = pk
@@ -97,23 +112,8 @@ class ProfilePost(APIView):
             return Response(profile_serializer.data, status=status.HTTP_201_CREATED)
         return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ProfilePostDetail(APIView):
+class CommentList(APIView):
     
-    permission_classes = [IsProfileOrReadOnly]
-
-    def get_object(self, pk):
-        try:
-            return Profile.objects.get(pk=pk)
-        except Profile.DoesNotExist:
-            raise Http404
-            
-    def get(self, request, pk, format=None):
-        profile = self.get_object(pk)
-        profile_serializer = ProfileListPostSerializer(profile, many=False)
-        return Response(profile_serializer.data, status=status.HTTP_200_OK)
-
-class PostListWithComment(APIView):
-
     permission_classes = [IsProfileOrReadOnly]
 
     def get(self, request, format=None):
@@ -130,7 +130,7 @@ class PostListWithCommentDetail(APIView):
             return Post.objects.get(pk=pk)
         except Post.DoesNotExist:
             raise Http404
-
+    
     def get(self, request, pk, format=None):
         post = self.get_object(pk)
         post_serializer = PostListCommentSerializer(post, many=False)

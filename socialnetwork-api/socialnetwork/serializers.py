@@ -14,7 +14,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Profile
-        fields = ['name', 'email', 'address']
+        fields = ['pk', 'name', 'email', 'address']
 
     def create(self, validated_data):
         name = validated_data['name'].split(" ")[0]
