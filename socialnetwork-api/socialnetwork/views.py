@@ -1,4 +1,5 @@
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
@@ -41,7 +42,7 @@ class UserList(APIView):
 class ProfileList(APIView):
 
     permission_classes = [IsProfileOrReadOnly]
-    
+
     def get(self, request, format=None):
         profiles = Profile.objects.all()
         self.check_object_permissions(request, Profile)
@@ -230,10 +231,14 @@ class AmountPostAndCommentFromProfile(APIView):
 
 class CustomAuthToken(ObtainAuthToken):
 
+    throttle_scope = 'api-token'
+    throttle_classes = [ScopedRateThrottle]
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
 
         if serializer.is_valid():
             user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key,'user_id': user.pk,'email': user.email})
+            return Response({'token': token.key,'user_id': user.pk, 'name': user.username, 'email': user.email})
+    
