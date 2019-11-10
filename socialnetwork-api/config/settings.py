@@ -118,7 +118,8 @@ REST_FRAMEWORK = {
     ,
 
     'DEFAULT_THROTTLE_RATES': 
-        {'api-token': '1/hour'}    
+        {'api-token': '1/hour'}
+        
 }
 
 # Internationalization

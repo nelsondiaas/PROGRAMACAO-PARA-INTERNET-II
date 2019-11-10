@@ -233,12 +233,16 @@ class CustomAuthToken(ObtainAuthToken):
 
     throttle_scope = 'api-token'
     throttle_classes = [ScopedRateThrottle]
-
+   
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
 
         if serializer.is_valid():
             user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key,'user_id': user.pk, 'name': user.username, 'email': user.email})
-    
+            return Response({
+                'token': token.key,
+                'user_id': user.pk, 
+                'name': user.username, 
+                'email': user.email}, 
+                status=status.HTTP_200_OK)
