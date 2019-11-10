@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'rest_framework.authtoken',
     'rest_framework',
     'socialnetwork'
 ]
@@ -102,6 +103,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Config Tokens
+REST_FRAMEWORK = {
+    
+    'DEFAULT_AUTHENTICATION_CLASSES':
+        ['rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication']
+    ,
+
+    'DEFAULT_THROTTLE_CLASSES':
+        ['rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle']
+    ,
+
+    'DEFAULT_THROTTLE_RATES': 
+        {'api-token': '1/hour'}    
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
