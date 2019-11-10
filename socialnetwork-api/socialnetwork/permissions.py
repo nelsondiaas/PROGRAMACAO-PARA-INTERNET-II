@@ -5,12 +5,6 @@ class IsUserOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated
 
-    def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        else:
-            return obj.user == request.user
-
 class IsProfileOrReadOnly(permissions.BasePermission):
     
     def has_permission(self, request, view):
@@ -23,7 +17,7 @@ class IsProfileOrReadOnly(permissions.BasePermission):
             return obj.user == request.user
 
 class PostIsOwnerOrReadOnly(permissions.BasePermission):
-
+    
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated
 
@@ -31,7 +25,7 @@ class PostIsOwnerOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         else:
-            return obj.profile.user == request.user
+            return obj.userId.user == request.user
 
 class CommentIsOwnerOrReadOnly(permissions.BasePermission):
 
@@ -42,12 +36,5 @@ class CommentIsOwnerOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         else:
-            return obj.post.profile.user == request.user
+            return obj.postId.userId.user == request.user
 
-class IsAmountPostAndCommentFromProfileOrReadOnly(permissions.BasePermission):
-
-    def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        else:
-            return obj.user == request.user

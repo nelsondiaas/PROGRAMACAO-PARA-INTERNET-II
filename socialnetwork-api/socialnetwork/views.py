@@ -1,4 +1,5 @@
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
@@ -71,7 +72,7 @@ class ProfileDetail(APIView):
     def delete(self, request, pk, format=None):
         profile = self.get_object(pk)
         profile.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK)
 
 class PostList(APIView):
 
@@ -83,7 +84,7 @@ class PostList(APIView):
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
     
 class PostDetail(APIView):
-    
+
     permission_classes = [PostIsOwnerOrReadOnly]
 
     def get_object(self, obj, pk):
@@ -91,7 +92,7 @@ class PostDetail(APIView):
             return obj.objects.get(pk=pk)
         except obj.DoesNotExist:
             raise Http404
-    
+
     def get(self, request, pk, format=None):
         profile = self.get_object(Profile, pk)
         profile_serializer = ProfileListPostSerializer(profile, many=False)
@@ -108,6 +109,7 @@ class PostDetail(APIView):
 
     def put(self, request, pk, format=None):
         post = self.get_object(Post, pk)
+        self.check_object_permissions(request, post)
         request.data['userId'] = post.userId_id
         request.data['pk'] = pk
         profile_serializer = PostSerializer(post, data=request.data)
@@ -115,6 +117,12 @@ class PostDetail(APIView):
             profile_serializer.save()
             return Response(profile_serializer.data, status=status.HTTP_200_OK)
         return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        post = self.get_object(Post, pk)
+        self.check_object_permissions(request, post)
+        post.delete()
+        return Response(status=status.HTTP_200_OK)
 
 class CommentList(APIView):
 
@@ -191,6 +199,12 @@ class CommentDetail(APIView):
             return Response(comment_serializer.data, status=status.HTTP_200_OK)
         return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, pk_post, pk_comment, format=None):
+        comment = self.get_comment(pk_post, pk_comment)
+        self.check_object_permissions(request, comment)
+        comment.delete()
+        return Response(status=status.HTTP_200_OK)
+    
 class AmountPostAndCommentFromProfile(APIView):
 
     permission_classes = [IsAmountPostAndCommentFromProfileOrReadOnly]
