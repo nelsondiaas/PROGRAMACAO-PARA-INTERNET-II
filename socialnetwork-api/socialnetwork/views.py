@@ -34,15 +34,17 @@ class UserList(APIView):
 
     def get(self, request, format=None):
         user = User.objects.all()
+        self.check_object_permissions(request, User)
         user_serializer = UserSerializer(user, many=True)
         return Response(user_serializer.data, status=status.HTTP_200_OK)
 
 class ProfileList(APIView):
 
     permission_classes = [IsProfileOrReadOnly]
-
+    
     def get(self, request, format=None):
         profiles = Profile.objects.all()
+        self.check_object_permissions(request, Profile)
         profile_serializer = ProfileSerializer(profiles, many=True)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
@@ -204,10 +206,8 @@ class CommentDetail(APIView):
         self.check_object_permissions(request, comment)
         comment.delete()
         return Response(status=status.HTTP_200_OK)
-    
-class AmountPostAndCommentFromProfile(APIView):
 
-    permission_classes = [IsAmountPostAndCommentFromProfileOrReadOnly]
+class AmountPostAndCommentFromProfile(APIView):
 
     def get(self, request, format=None):
         profiles = Profile.objects.all()
