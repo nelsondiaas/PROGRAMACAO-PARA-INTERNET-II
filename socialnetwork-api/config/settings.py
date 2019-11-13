@@ -116,13 +116,11 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES':
         ['rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle']
+    ,
     
-}
-
-'''
     'DEFAULT_THROTTLE_RATES': 
         {'api-token': '1/hour'}
-'''
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/

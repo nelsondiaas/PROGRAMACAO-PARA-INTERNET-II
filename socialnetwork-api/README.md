@@ -27,7 +27,7 @@ Para iniciar os testes, temos que comentar alguns dados no projeto, o motivo é 
 Agora temos que executar um comando, para que possamos criar um ``.json`` dos nossos dados em banco. O porque disso? teremos que fazer testes com esses dados povoado em um arquivo de teste ``.sqlite3`` que o proprio django ira criar e povoar esse novo banco com nossos dados em ``.json``. Logo em seguida podera executar os tests.
 
 ```
-$ python manager.py dumpdata -o my_db_test.json --exclude=contenttypes
+$ python manage.py dumpdata -o my_db_test.json
 ```
 ```
 $ python manager.py test

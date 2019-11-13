@@ -1,14 +1,6 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 
-'''
-Quando executa esses tests, terá que commentar o
-'DEFAULT_THROTTLE_RATES', que está em config/settings.py, e comentar
-throttle_scope & throttle_classes em socialnetwork/views o na class 
-CustomAuthToken, pois o mesmo permite apenas 1 token gerado a cada 
-hora por user.
-
-'''
 
 class APITest(TestCase):
 
@@ -172,7 +164,7 @@ class APITest(TestCase):
         self.assertEqual(response.status_code, 403)
         print("\n> TEST_POST_DETAIL_UPDATE_PERMISSIONS \nstatus_code: {}\nnotice: {}".format(
         response.status_code, response.data['detail']))
-    
+
     def test_post_detail_delete_permission(self):
         url = reverse('post-detail', kwargs={'pk': 1})
         response = self.client.delete(url, HTTP_AUTHORIZATION=self.token)
