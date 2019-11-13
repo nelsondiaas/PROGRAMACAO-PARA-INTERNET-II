@@ -172,3 +172,10 @@ class APITest(TestCase):
         self.assertEqual(response.status_code, 403)
         print("\n> TEST_POST_DETAIL_UPDATE_PERMISSIONS \nstatus_code: {}\nnotice: {}".format(
         response.status_code, response.data['detail']))
+    
+    def test_post_detail_delete_permission(self):
+        url = reverse('post-detail', kwargs={'pk': 1})
+        response = self.client.delete(url, HTTP_AUTHORIZATION=self.token)
+        self.assertEqual(response.status_code, 403)
+        print("\n> TEST_POST_DETAIL_DELETE_PERMISSIONS \nstatus_code: {}\nnotice: {}".format(
+        response.status_code, response.data['detail']))
