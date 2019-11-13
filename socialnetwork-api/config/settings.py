@@ -78,9 +78,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
 DATABASES = {
+
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
     }
 }
 
@@ -115,12 +116,13 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES':
         ['rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle']
-    ,
+    
+}
 
+'''
     'DEFAULT_THROTTLE_RATES': 
         {'api-token': '1/hour'}
-        
-}
+'''
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/

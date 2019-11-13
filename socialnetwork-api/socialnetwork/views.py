@@ -100,7 +100,7 @@ class PostDetail(APIView):
         profile = self.get_object(Profile, pk)
         profile_serializer = ProfileListPostSerializer(profile, many=False)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
-
+    
     def post(self, request, pk, format=None):
         self.get_object(Profile, pk)
         request.data['userId'] = pk
@@ -231,18 +231,20 @@ class AmountPostAndCommentFromProfile(APIView):
 
 class CustomAuthToken(ObtainAuthToken):
 
+    '''
     throttle_scope = 'api-token'
     throttle_classes = [ScopedRateThrottle]
-   
+    '''
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
+        self.check_throttles(request) 
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk, 
+            'name': user.username, 
+            'email': user.email},
+            status=status.HTTP_200_OK)
 
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({
-                'token': token.key,
-                'user_id': user.pk, 
-                'name': user.username, 
-                'email': user.email}, 
-                status=status.HTTP_200_OK)
