@@ -156,3 +156,19 @@ class APITest(TestCase):
         response = self.client.delete(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         print("\n> TEST_COMMENT_DETAIL_DELETE \nstatus_code: {}".format(response.status_code))
+
+    '''
+        test de permissões
+    '''
+
+    def test_post_detail_update_permission(self):
+        data= {
+            "title": "SOU PROPRIETARIO E CONSIGO EDITAR",
+            "body": "Meu primeiro post modificado"
+        }
+        url = reverse('post-detail', kwargs={'pk': 1})
+        response = self.client.put(url, 
+        data=data, content_type='application/json', HTTP_AUTHORIZATION=self.token)
+        self.assertEqual(response.status_code, 403)
+        print("\n> TEST_POST_DETAIL_UPDATE_PERMISSIONS \nstatus_code: {}\nnotice: {}".format(
+        response.status_code, response.data['detail']))
