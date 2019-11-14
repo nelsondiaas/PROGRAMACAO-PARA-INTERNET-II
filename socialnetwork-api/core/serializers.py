@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from socialnetwork.models import *
+from core.models import *
 
 User = get_user_model()
 
@@ -20,7 +20,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['pk', 'name', 'email', 'address']
-
+    
     def create(self, validated_data):
         name = validated_data['name'].split(" ")[0]
         email = validated_data['email']

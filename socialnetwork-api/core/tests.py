@@ -5,7 +5,7 @@ from django.urls import reverse
 class APITest(TestCase):
 
     fixtures = ['my_db_test.json']
-
+    
     def setUp(self):
         self.client = Client()
         self.token = self.get_token()
