@@ -19,7 +19,8 @@ class ApiRoot(APIView):
     def get(self, request, *args, **kwargs):
 
         data = {
-
+            
+            'api-token': reverse('api-token', request=request),
             'users': reverse('users-list', request=request),
             'profiles': reverse('profiles-list', request=request),
             'profiles-posts': reverse('posts-list', request=request),

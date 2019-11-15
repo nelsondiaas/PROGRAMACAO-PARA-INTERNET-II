@@ -1,6 +1,7 @@
 # Social Network - API
 
 ## Dependências
+* Python 3.6
 * Django
 * django_extensions
 * rest_framework
@@ -32,3 +33,7 @@ $ python manage.py dumpdata -o my_db_test.json
 ```
 $ python manager.py test
 ```
+## Apresentação
+
+>> https://youtu.be/YtLCb2BtWGc
+

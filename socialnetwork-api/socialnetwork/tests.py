@@ -120,7 +120,7 @@ class APITest(TestCase):
             "email": "nelson@gmail.com",
             "body": "DEUS SEJA LOUVADO, ALELUIAAAAAA"
         }
-        url = reverse('comment-detail', kwargs={'pk_post': 11, 'pk_comment': 51})
+        url = reverse('comment-detail', kwargs={'pk_post': 11, 'pk_comment': 52})
         response = self.client.put(url, 
         data=data, content_type='application/json', HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
@@ -142,9 +142,9 @@ class APITest(TestCase):
         response = self.client.delete(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         print("\n> TEST_POST_DETAIL_DELETE \nstatus_code: {}".format(response.status_code))
-
+    
     def test_comment_detail_delete(self):
-        url = reverse('comment-detail',  kwargs={'pk_post': 11, 'pk_comment': 51})
+        url = reverse('comment-detail',  kwargs={'pk_post': 11, 'pk_comment': 52})
         response = self.client.delete(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         print("\n> TEST_COMMENT_DETAIL_DELETE \nstatus_code: {}".format(response.status_code))
