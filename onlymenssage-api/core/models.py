@@ -7,4 +7,5 @@ class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profile")
     status = models.CharField(max_length=120)
     
-
+    class Meta:
+        ordering = ['user']
