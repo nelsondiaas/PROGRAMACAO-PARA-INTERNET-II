@@ -1,4 +1,5 @@
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
@@ -7,12 +8,15 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework import status
+from .paginator import Paginator
 from django.http import Http404
 from .serializers import *
 from .permissions import *
 from .models import *
 
+
 User = get_user_model()
+
 
 class ApiRoot(APIView):
 
@@ -23,32 +27,40 @@ class ApiRoot(APIView):
             'api-token': reverse('api-token', request=request),
             'users': reverse('users-list', request=request),
             'profiles': reverse('profiles-list', request=request),
-            'profiles-posts': reverse('posts-list', request=request),
-            'posts-comments': reverse('comments-list', request=request),
+            'profiles-posts': reverse('profiles-posts-list', request=request),
+            'posts-comments': reverse('posts-comments-list', request=request),
             'profiles-detail': reverse('profiles-detail-posts-comments', request=request),
+  
         }
 
         return Response(data, status=status.HTTP_200_OK)
 
-class UserList(APIView):
+
+class UserList(Paginator, APIView):
 
     permission_classes = [IsUserOrReadOnly]
+    pagination_class = PageNumberPagination
 
     def get(self, request, format=None):
-        user = User.objects.all()
+        user = User.objects.get_queryset().order_by('id')
         self.check_object_permissions(request, User)
+        page = self.paginate_queryset(user)
         user_serializer = UserSerializer(user, many=True)
-        return Response(user_serializer.data, status=status.HTTP_200_OK)
+        return self.get_paginated_response(user_serializer.data)
 
-class ProfileList(APIView):
+
+class ProfileList(Paginator, APIView):
 
     permission_classes = [IsProfileOrReadOnly]
+    pagination_class = PageNumberPagination
 
     def get(self, request, format=None):
-        profiles = Profile.objects.all()
+        profiles = Profile.objects.get_queryset().order_by('id')
         self.check_object_permissions(request, Profile)
+        page = self.paginate_queryset(profiles)
         profile_serializer = ProfileSerializer(profiles, many=True)
-        return Response(profile_serializer.data, status=status.HTTP_200_OK)
+        return self.get_paginated_response(profile_serializer.data)
+
 
 class ProfileDetail(APIView):
 
@@ -78,16 +90,33 @@ class ProfileDetail(APIView):
         profile.delete()
         return Response(status=status.HTTP_200_OK)
 
-class PostList(APIView):
 
-    permission_classes = [PostIsOwnerOrReadOnly]
+class ProfilePostList(Paginator, APIView):
+
+    permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
 
     def get(self, request, format=None):
-        profiles = Profile.objects.all()
-        profile_serializer = ProfileListPostSerializer(profiles, many=True)
-        return Response(profile_serializer.data, status=status.HTTP_200_OK)
-    
-class PostDetail(APIView):
+        profiles = Profile.objects.get_queryset().order_by('id')
+        context = {'request': request}
+        page = self.paginate_queryset(profiles)
+        profile_serializer = ProfileListPostSerializer(profiles, context=context, many=True)
+        return self.get_paginated_response(profile_serializer.data)
+
+
+class PostCommentList(Paginator, APIView):
+
+    pagination_class = PageNumberPagination
+
+    def get(self, request, format=None):
+        posts = Post.objects.get_queryset().order_by('id')
+        context = {'request': request}
+        page = self.paginate_queryset(posts)
+        post_serializer = PostListCommentSerializer(posts, context=context, many=True)
+        return self.get_paginated_response(post_serializer.data)
+
+
+class PostDetailWithCommentList(APIView):
 
     permission_classes = [PostIsOwnerOrReadOnly]
 
@@ -96,11 +125,12 @@ class PostDetail(APIView):
             return obj.objects.get(pk=pk)
         except obj.DoesNotExist:
             raise Http404
-
+    
     def get(self, request, pk, format=None):
-        profile = self.get_object(Profile, pk)
-        profile_serializer = ProfileListPostSerializer(profile, many=False)
-        return Response(profile_serializer.data, status=status.HTTP_200_OK)
+        post = self.get_object(Post, pk)
+        context = {'request': request}
+        post_serializer = PostListCommentSerializer(post, context=context, many=False)
+        return Response(post_serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, pk, format=None):
         self.get_object(Profile, pk)
@@ -128,18 +158,36 @@ class PostDetail(APIView):
         post.delete()
         return Response(status=status.HTTP_200_OK)
 
+
+class ProfilePostDetail(APIView):
+
+    permission_classes = [IsProfileOrReadOnly]
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+        
+    def get(self, request, pk, format=None):
+        profile = self.get_object(Profile, pk)
+        context = {'request': request}
+        profile_serializer = ProfileListPostSerializer(profile, context=context, many=False)
+        return Response(profile_serializer.data, status=status.HTTP_200_OK)
+    
+
 class CommentList(APIView):
 
     permission_classes = [CommentIsOwnerOrReadOnly]
 
     def get(self, request, format=None):
         post = Post.objects.all()
-        post_serializer = PostListCommentSerializer(post, many=True)
+        context = {'request': request}
+        post_serializer = PostListCommentSerializer(post, context=context, many=True)
         return Response(post_serializer.data, status=status.HTTP_200_OK)
 
-class PostListWithCommentDetail(APIView):
 
-    permission_classes = [CommentIsOwnerOrReadOnly]
+class CommentView(APIView):
 
     def get_object(self, pk):
         try:
@@ -149,24 +197,36 @@ class PostListWithCommentDetail(APIView):
     
     def get(self, request, pk, format=None):
         post = self.get_object(pk)
-        post_serializer = PostListCommentSerializer(post, many=False)
-        return Response(post_serializer.data, status=status.HTTP_200_OK)
+        context = {'request': request}
+        comment_serializer = CommentDetailSerializer(post.comments, context=context, many=True)
+        return Response(comment_serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request, pk, format=None):
+        comment = request.data
+        comment['postId'] = pk
+        comment_serializer = CommentSerializer(data=comment)
+        if comment_serializer.is_valid():
+            comment_serializer.save()
+            return Response(comment_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class CommentCreateOrList(APIView):
+
+class CommentDetail(APIView):
 
     permission_classes = [CommentIsOwnerOrReadOnly]
 
-    def get_object(self, pk):
+    def get_comment(self, pk):
         try:
-            return Comment.objects.filter(postId=pk)
+            return Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
             raise Http404
-        
+    
     def get(self, request, pk, format=None):
-        comment = self.get_object(pk)
-        comment_serializer = CommentSerializer(comment, many=True)
+        comment = self.get_comment(pk)
+        context = {'request': request}
+        comment_serializer = CommentDetailSerializer(comment, context=context, many=False)
         return Response(comment_serializer.data, status=status.HTTP_200_OK)
-
+    
     def post(self, request, pk, format=None):
         request.data['postId'] = pk
         comment_serializer = CommentSerializer(data=request.data)
@@ -175,39 +235,20 @@ class CommentCreateOrList(APIView):
             return Response(comment_serializer.data, status=status.HTTP_201_CREATED)
         return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class CommentDetail(APIView):
-
-    permission_classes = [CommentIsOwnerOrReadOnly]
-
-    def get_comment(self, pk_post, pk_comment):
-        try:
-            post = Comment.objects.filter(postId=pk_post)
-            try:
-                return post.get(pk=pk_comment)
-            except Comment.DoesNotExist:
-                raise Http404
-        except Post.DoesNotExist:
-            raise Http404
-        
-    def get(self, request, pk_post, pk_comment, format=None):
-        comment = self.get_comment(pk_post, pk_comment)
-        comment_serializer = CommentSerializer(comment, many=False)
-        return Response(comment_serializer.data, status=status.HTTP_200_OK)
-
-    def put(self, request, pk_post, pk_comment, format=None):
-        comment = self.get_comment(pk_post, pk_comment)
-        request.data['postId'] = pk_post
+    def put(self, request, pk, format=None):
+        comment = self.get_comment(pk)
         comment_serializer = CommentSerializer(comment, data=request.data)
         if comment_serializer.is_valid():
             comment_serializer.save()
             return Response(comment_serializer.data, status=status.HTTP_200_OK)
         return Response(comment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk_post, pk_comment, format=None):
-        comment = self.get_comment(pk_post, pk_comment)
+    def delete(self, request, pk, format=None):
+        comment = self.get_comment(pk)
         self.check_object_permissions(request, comment)
         comment.delete()
         return Response(status=status.HTTP_200_OK)
+
 
 class AmountPostAndCommentFromProfile(APIView):
 

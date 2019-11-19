@@ -42,14 +42,14 @@ class APITest(TestCase):
         response.status_code))
 
     def test_post_list(self):
-        url = reverse('posts-list')
+        url = reverse('posts-comments-list')
         response = self.client.get(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         print("\n> TEST_POST_LIST \nstatus_code: {}".format(
         response.status_code))
 
     def test_comment_list(self):
-        url = reverse('comments-list')
+        url = reverse('comments-list', kwargs={'pk': 1})
         response = self.client.get(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         print("\n> TEST_COMMENT_LIST \nstatus_code: {}".format(
@@ -67,14 +67,14 @@ class APITest(TestCase):
         response.data['name'], response.status_code))
 
     def test_post_detail(self):
-        url = reverse('post-detail', kwargs={'pk': 1})
+        url = reverse('post-comments-detail', kwargs={'pk': 14})
         response = self.client.get(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         print("\n> TEST_POST_DETAIL \nname: {}\nstatus_code: {}".format(
-        response.data['name'], response.status_code))
+        response.data['title'], response.status_code))
 
     def test_comment_detail(self):
-        url = reverse('comment-detail', kwargs={'pk_post': 1, 'pk_comment': 1})
+        url = reverse('comment-detail', kwargs={'pk': 1})
         response = self.client.get(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         print("\n> TEST_COMMENT_DETAIL \nname: {}\nstatus_code: {}".format(
@@ -107,7 +107,7 @@ class APITest(TestCase):
             "title": "SOU PROPRIETARIO E CONSIGO EDITAR",
             "body": "Meu primeiro post modificado"
         }
-        url = reverse('post-detail', kwargs={'pk': 11})
+        url = reverse('post-comments-detail', kwargs={'pk': 11})
         response = self.client.put(url, 
         data=data, content_type='application/json', HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
@@ -116,11 +116,12 @@ class APITest(TestCase):
 
     def test_comment_detail_update(self):
         data = {
+            "postId": 13,
             "name": "NELSON DIAS DE MEDEIROS",
             "email": "nelson@gmail.com",
             "body": "DEUS SEJA LOUVADO, ALELUIAAAAAA"
         }
-        url = reverse('comment-detail', kwargs={'pk_post': 11, 'pk_comment': 52})
+        url = reverse('comment-detail', kwargs={'pk': 61})
         response = self.client.put(url, 
         data=data, content_type='application/json', HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
@@ -138,13 +139,13 @@ class APITest(TestCase):
         print("\n> TEST_PROFILE_DETAIL_DELETE \nstatus_code: {}".format(response.status_code))
 
     def test_post_detail_delete(self):
-        url = reverse('post-detail', kwargs={'pk': 11})
+        url = reverse('post-comments-detail', kwargs={'pk': 11})
         response = self.client.delete(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         print("\n> TEST_POST_DETAIL_DELETE \nstatus_code: {}".format(response.status_code))
     
     def test_comment_detail_delete(self):
-        url = reverse('comment-detail',  kwargs={'pk_post': 11, 'pk_comment': 52})
+        url = reverse('comment-detail',  kwargs={'pk': 56})
         response = self.client.delete(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         print("\n> TEST_COMMENT_DETAIL_DELETE \nstatus_code: {}".format(response.status_code))
@@ -158,7 +159,7 @@ class APITest(TestCase):
             "title": "SOU PROPRIETARIO E CONSIGO EDITAR",
             "body": "Meu primeiro post modificado"
         }
-        url = reverse('post-detail', kwargs={'pk': 1})
+        url = reverse('post-comments-detail', kwargs={'pk': 1})
         response = self.client.put(url, 
         data=data, content_type='application/json', HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 403)
@@ -166,7 +167,7 @@ class APITest(TestCase):
         response.status_code, response.data['detail']))
 
     def test_post_detail_delete_permission(self):
-        url = reverse('post-detail', kwargs={'pk': 1})
+        url = reverse('post-comments-detail', kwargs={'pk': 1})
         response = self.client.delete(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 403)
         print("\n> TEST_POST_DETAIL_DELETE_PERMISSIONS \nstatus_code: {}\nnotice: {}".format(

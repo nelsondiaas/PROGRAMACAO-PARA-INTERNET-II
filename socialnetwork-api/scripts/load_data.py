@@ -1,4 +1,4 @@
-from socialnetwork.serializers import *
+from .serializers import *
 import json
 
 data = open('db.json', 'r')

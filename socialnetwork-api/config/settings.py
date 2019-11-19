@@ -105,22 +105,26 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Config Tokens
+
 REST_FRAMEWORK = {
     
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+
     'DEFAULT_AUTHENTICATION_CLASSES':
         ['rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication']
     ,
-
+    
     'DEFAULT_THROTTLE_CLASSES':
         ['rest_framework.throttling.ScopedRateThrottle'] 
     ,
 
     'DEFAULT_THROTTLE_RATES': 
         {'api-token': '1/hour'}
-
 }
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
