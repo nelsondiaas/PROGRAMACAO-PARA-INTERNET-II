@@ -13,8 +13,8 @@ class Profile(models.Model):
 
 
 class Friendship(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="friends")
-    friend = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    friend = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="friends")
     date_added = models.DateField()
 
     class Meta:
@@ -24,12 +24,9 @@ class Friendship(models.Model):
 class Chat(models.Model):
     date_created = models.DateField()
 
-    class Meta:
-        abstract = True
-
 
 class SingleChat(Chat):
-    friendship = models.ForeignKey(Friendship)
+    friendship = models.ForeignKey(Friendship, on_delete=models.CASCADE)
 
 
 class GroupChat(Chat):
@@ -42,7 +39,7 @@ class GroupMember(models.Model):
 
 
 class Message(models.Model):
-    chat = models.ForeignKey(Chat, related_name="messages", on_delete=models.CASCADE)
-    sent_by = models.ForeignKey(Profile)
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")
+    sent_by = models.ForeignKey(Profile, on_delete=models.CASCADE)
     content = models.TextField(blank=True)
     timestamp = models.DateTimeField()
