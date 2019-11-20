@@ -32,7 +32,7 @@ class ProfileList(APIView):
 
 class HelloView(APIView):
     permission_classes = [IsAuthenticated]
-
+    
     def get(self, request,  format=None):
         content = {'message': 'Hello, World!'}
         return Response(content)
