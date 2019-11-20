@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from .paginator import Paginator
 from django.http import Http404
+from .permissions import *
 from .serializers import *
 from .models import *
 
@@ -27,7 +28,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 class ProfileListView(Paginator, APIView):
 
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [ReadOnly]
     pagination_class = PageNumberPagination
     
     def get(self, request, format=None):
