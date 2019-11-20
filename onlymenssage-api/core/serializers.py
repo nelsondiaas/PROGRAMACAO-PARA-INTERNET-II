@@ -17,14 +17,23 @@ class ProfileSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data['user'])
         user.save()
-        return Profile.objects.create(user=user, status=validated_data['status'])
+        return Profile.objects.create(user=user)
 
 
 class ProfileListViewSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username')
+    url = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="profile-detail-view")
 
     class Meta:
         model = Profile
-        fields = ['pk', 'username', 'status']
+        fields = ['url']
+
+class ProfileDetailViewSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username')
+    email = serializers.CharField(source='user.email')
+
+    class Meta:
+        model = Profile
+        fields = ['pk', 'username', 'email', 'status']
+
 
 

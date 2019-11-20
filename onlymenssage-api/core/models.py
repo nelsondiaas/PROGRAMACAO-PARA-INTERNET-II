@@ -6,7 +6,7 @@ User = get_user_model()
 
 class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profile")
-    status = models.CharField(max_length=120)
+    status = models.CharField(max_length=120, default="Bem vindo ao meu perfil")
     
     class Meta:
         ordering = ['user']
@@ -16,7 +16,7 @@ class Friendship(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     friend = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="friends")
     date_added = models.DateField()
-
+ 
     class Meta:
         ordering = ['date_added']
 
