@@ -35,5 +35,9 @@ class ProfileDetailViewSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['pk', 'username', 'email', 'status']
 
+    def patch(self, instance, validated_data):
+        instance.status = validated_data.get('status', instance.status)
+        return instance.save()
+
 
 

@@ -28,7 +28,6 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 class ProfileListView(Paginator, APIView):
 
-    #permission_classes = [ReadOnly]
     pagination_class = PageNumberPagination
     
     def get(self, request, format=None):
@@ -48,7 +47,7 @@ class ProfileListView(Paginator, APIView):
 
 class ProfileDetailView(APIView):
 
-    permission_classes = [IsAuthenticated, ReadOnly]
+    permission_classes = [IsAuthenticated, ProfileOwnerReadOnly]
 
     def get_object(self, obj, pk):
         try:
@@ -61,3 +60,12 @@ class ProfileDetailView(APIView):
         context = {'request': request}
         profile_serializer = ProfileDetailViewSerializer(profile, context=context, many=False)
         return Response(profile_serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk, format=None):
+        profile = self.get_object(Profile, pk)
+        self.check_object_permissions(request, profile)
+        profile_serializer = ProfileDetailViewSerializer(profile, data=request.data, partial=True)
+        if profile_serializer.is_valid():
+            profile_serializer.save()
+            return Response(profile_serializer.data, status=status.HTTP_200_OK)
+        return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
