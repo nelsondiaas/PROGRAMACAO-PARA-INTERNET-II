@@ -27,6 +27,7 @@ class ProfileListViewSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['url']
 
+
 class ProfileDetailViewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     email = serializers.CharField(source='user.email')
@@ -40,4 +41,8 @@ class ProfileDetailViewSerializer(serializers.ModelSerializer):
         return instance.save()
 
 
-
+class FriendshipSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Friendship
+        fields = ['pk', 'profile', 'friend', 'date_added']

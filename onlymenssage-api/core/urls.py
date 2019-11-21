@@ -10,4 +10,6 @@ urlpatterns = [
 
     path('api/v1/profiles/<int:pk>/', ProfileDetailView.as_view(), name='profile-detail-view'),
 
+    path('api/v1/profiles/<int:pk_sender>/friendships/<int:pk_target>/', FriendShipDetailView.as_view(), name='friendship-detail-view'),
+    
 ]

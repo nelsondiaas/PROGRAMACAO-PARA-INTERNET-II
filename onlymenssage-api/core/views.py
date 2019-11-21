@@ -46,7 +46,7 @@ class ProfileListView(Paginator, APIView):
 
 
 class ProfileDetailView(APIView):
-
+    
     permission_classes = [IsAuthenticated, ProfileOwnerReadOnly]
 
     def get_object(self, obj, pk):
@@ -75,3 +75,23 @@ class ProfileDetailView(APIView):
         self.check_object_permissions(request, profile)
         profile.delete()
         return Response(status=status.HTTP_200_OK)
+
+class FriendShipDetailView(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+    
+    def post(self, request, pk_sender, pk_target, format=None):
+        sender = self.get_object(Profile, pk_sender)
+        target = self.get_object(Profile, pk_target)
+        request.data['profile'] = sender.pk;
+        request.data['friend'] = target.pk;
+        friendship_serializer = FriendshipSerializer(data=request.data)
+        if friendship_serializer.is_valid():
+            friendship_serializer.save()
+            return Response(friendship_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(friendship_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
