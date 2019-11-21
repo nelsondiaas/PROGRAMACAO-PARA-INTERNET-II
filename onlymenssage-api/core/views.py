@@ -69,3 +69,9 @@ class ProfileDetailView(APIView):
             profile_serializer.save()
             return Response(profile_serializer.data, status=status.HTTP_200_OK)
         return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        profile = self.get_object(Profile, pk)
+        self.check_object_permissions(request, profile)
+        profile.delete()
+        return Response(status=status.HTTP_200_OK)
