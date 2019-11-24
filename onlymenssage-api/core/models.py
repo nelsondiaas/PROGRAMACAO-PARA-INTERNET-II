@@ -12,11 +12,15 @@ class Profile(models.Model):
         ordering = ['user']
 
 
-class Friendship(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    friend = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="friends")
+class Contact(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="contacts")
+    friend = models.ForeignKey(Profile, on_delete=models.CASCADE)
     date_added = models.DateTimeField(auto_now_add=True)
- 
+
+    @property
+    def get_contacts(self):
+        return "http://localhost:8000/api/v1/profiles/{}/".format(self.friend.user.pk)
+    
     class Meta:
         ordering = ['date_added']
 
@@ -26,7 +30,7 @@ class Chat(models.Model):
 
 
 class SingleChat(Chat):
-    friendship = models.ForeignKey(Friendship, on_delete=models.CASCADE)
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
 
 
 class GroupChat(Chat):
@@ -35,7 +39,7 @@ class GroupChat(Chat):
 
 class GroupMember(models.Model):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name="members")
-    friendship = models.ForeignKey(Friendship, on_delete=models.CASCADE)
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
 
 
 class Message(models.Model):

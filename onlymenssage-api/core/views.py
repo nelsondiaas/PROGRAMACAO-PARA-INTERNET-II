@@ -76,7 +76,8 @@ class ProfileDetailView(APIView):
         profile.delete()
         return Response(status=status.HTTP_200_OK)
 
-class FriendShipDetailView(APIView):
+
+class ContactView(APIView):
 
     def get_object(self, obj, pk):
         try:
@@ -89,9 +90,28 @@ class FriendShipDetailView(APIView):
         target = self.get_object(Profile, pk_target)
         request.data['profile'] = sender.pk;
         request.data['friend'] = target.pk;
-        friendship_serializer = FriendshipSerializer(data=request.data)
-        if friendship_serializer.is_valid():
-            friendship_serializer.save()
-            return Response(friendship_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(friendship_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        contact_serializer = ContactSerializer(data=request.data)
+        if contact_serializer.is_valid():
+            contact_serializer.save()
+            return Response(contact_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(contact_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
+class ContactDetailView(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            profile = obj.objects.get(pk=pk)
+            try:
+                return Contact.objects.filter(profile=profile).all()
+            except Contact.DoesNotExist:
+                raise Http404
+        except obj.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        contacts = self.get_object(Profile, pk)
+        context = {'request': request}
+        contact_serializer = ContactDetailSerializer(contacts, context=context, many=True)
+        return Response(contact_serializer.data, status=status.HTTP_200_OK)
+
