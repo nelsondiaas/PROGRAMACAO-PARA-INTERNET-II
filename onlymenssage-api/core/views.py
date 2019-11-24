@@ -97,7 +97,9 @@ class ContactView(APIView):
         return Response(contact_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class ContactDetailView(APIView):
+class ContactDetailView(Paginator, APIView):
+
+    pagination_class = PageNumberPagination
 
     def get_object(self, obj, pk):
         try:
@@ -108,10 +110,24 @@ class ContactDetailView(APIView):
                 raise Http404
         except obj.DoesNotExist:
             raise Http404
-    
+        
     def get(self, request, pk, format=None):
         contacts = self.get_object(Profile, pk)
+        page = self.paginate_queryset(contacts)
         context = {'request': request}
         contact_serializer = ContactDetailSerializer(contacts, context=context, many=True)
-        return Response(contact_serializer.data, status=status.HTTP_200_OK)
+        return self.get_paginated_response(contact_serializer.data)
 
+
+
+class ApiRoot(APIView):
+
+    def get(self, request, *args, **kwargs):
+
+        data = {
+            
+            'profiles': reverse('profile-list-view', request=request),
+  
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
