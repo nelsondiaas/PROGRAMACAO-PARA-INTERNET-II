@@ -119,8 +119,25 @@ class ContactDetailView(Paginator, APIView):
         return self.get_paginated_response(contact_serializer.data)
 
 
-class SingleChatView():
-    pass
+class SingleChatView(APIView):
+
+    def get_object(self, obj, pk_profile, pk_contact):
+        try:
+            profile = obj.objects.get(pk=pk_profile)
+            try:
+                return Contact.objects.get(profile=profile, pk=pk_contact)
+            except Contact.DoesNotExist:
+                raise Http404
+        except obj.DoesNotExist:
+            raise Http404
+    
+    def post(self, request, pk_sender, pk_contact, format=None):
+        contact = self.get_object(Profile, pk_sender, pk_contact)
+        single_chat_serializer = SingleChatViewSerializer(contact, many=False)
+        if single_chat_serializer.is_valid():
+            single_chat_serializer.save()
+            return Response(single_chat_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(single_chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ApiRoot(APIView):

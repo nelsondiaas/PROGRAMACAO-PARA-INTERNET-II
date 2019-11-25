@@ -59,3 +59,10 @@ class ContactDetailSerializer(serializers.ModelSerializer):
         fields = ['pk', 'profile', 'friend', 'date_added']
 
 
+class SingleChatViewSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = SingleChat
+        fields = ['contact', 'date_created']
+
+

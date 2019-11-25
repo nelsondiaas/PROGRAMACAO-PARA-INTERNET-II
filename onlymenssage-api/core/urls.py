@@ -16,4 +16,6 @@ urlpatterns = [
     
     path('api/v1/profiles-contacts/<int:pk>/', ContactDetailView.as_view(), name='contact-detail'),
 
+    path('api/v1/profiles/<int:pk_profile>/singlechat/<int:pk_contact>/', SingleChatView.as_view(), name='singlechat-view'),
+
 ]
