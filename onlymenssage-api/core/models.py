@@ -30,6 +30,7 @@ class Chat(models.Model):
 
 
 class SingleChat(Chat):
+    status = models.BooleanField(default=False)
     contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
 
 

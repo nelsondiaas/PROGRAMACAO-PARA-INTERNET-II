@@ -88,8 +88,8 @@ class ContactView(APIView):
     def post(self, request, pk_sender, pk_target, format=None):
         sender = self.get_object(Profile, pk_sender)
         target = self.get_object(Profile, pk_target)
-        request.data['profile'] = sender.pk;
-        request.data['friend'] = target.pk;
+        request.data['profile'] = seder.pk;
+        request.data['friend'] = target.pk;n
         contact_serializer = ContactSerializer(data=request.data)
         if contact_serializer.is_valid():
             contact_serializer.save()
@@ -130,14 +130,30 @@ class SingleChatView(APIView):
                 raise Http404
         except obj.DoesNotExist:
             raise Http404
-    
-    def post(self, request, pk_sender, pk_contact, format=None):
-        contact = self.get_object(Profile, pk_sender, pk_contact)
-        single_chat_serializer = SingleChatViewSerializer(contact, many=False)
+
+    def post(self, request, pk_profile, pk_contact, format=None):
+        contact = self.get_object(Profile, pk_profile, pk_contact)
+        request.data['contact'] = contact.pk
+        single_chat_serializer = SingleChatViewSerializer(data=request.data)
         if single_chat_serializer.is_valid():
             single_chat_serializer.save()
             return Response(single_chat_serializer.data, status=status.HTTP_201_CREATED)
         return Response(single_chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProfileSingleChatList(APIView):
+
+    def get(self, request, pk, format=None):
+        profile = Profile.objects.get(pk=pk)
+        contacts = Contact.objects.filter(profile=profile)
+
+        list_singlechat = []
+        for contact in contacts:
+            single_chat = SingleChat.objects.filter(contact=contact)
+            for singlechat in single_chat:
+                list_singlechat.append(singlechat)
+        singlechat_serializer = SingleChatViewSerializer(list_singlechat, many=True)
+        return Response(singlechat_serializer.data, status=status.HTTP_200_OK)
 
 
 class ApiRoot(APIView):
