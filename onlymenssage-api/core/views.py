@@ -110,7 +110,7 @@ class ContactDetailView(Paginator, APIView):
                 raise Http404
         except obj.DoesNotExist:
             raise Http404
-        
+    
     def get(self, request, pk, format=None):
         contacts = self.get_object(Profile, pk)
         page = self.paginate_queryset(contacts)
@@ -118,6 +118,9 @@ class ContactDetailView(Paginator, APIView):
         contact_serializer = ContactDetailSerializer(contacts, context=context, many=True)
         return self.get_paginated_response(contact_serializer.data)
 
+
+class SingleChatView():
+    pass
 
 
 class ApiRoot(APIView):
