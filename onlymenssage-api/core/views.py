@@ -143,18 +143,17 @@ class SingleChatView(APIView):
         friend = self.get_object(Profile, contact.friend.pk)
 
         contact_verify = Contact.objects.filter(profile=friend, friend=owner)
-        
+
         single_verify = False
-        if contact_verify != []:
+        
+        if len(contact_verify):
             single_verify = SingleChat.objects.filter(contact=contact_verify[0]).exists()
 
-        if not singlechat:
-            if not single_verify:
-                if single_chat_serializer.is_valid():
-                    single_chat_serializer.save()
-                    return Response(single_chat_serializer.data, status=status.HTTP_201_CREATED)
-                return Response(single_chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response({"error": "Singlechat already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        if not singlechat and not single_verify:
+            if single_chat_serializer.is_valid():
+                single_chat_serializer.save()
+                return Response(single_chat_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(single_chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Singlechat already exists."}, status=status.HTTP_400_BAD_REQUEST)
 
 
