@@ -131,18 +131,30 @@ class SingleChatView(APIView):
             return obj.objects.get(pk=pk)
         except obj.DoesNotExist:
             raise Http404
-
+    
     def post(self, request, pk, format=None):
         contact = self.get_object(Contact, pk)
         singlechat = SingleChat.objects.filter(contact=contact).exists()
         request.data['contact'] = contact.pk
         context = {'request': request}
         single_chat_serializer = SingleChatViewSerializer(data=request.data, context=context)
+
+        owner = self.get_object(Profile, contact.profile.pk)
+        friend = self.get_object(Profile, contact.friend.pk)
+
+        contact_verify = Contact.objects.filter(profile=friend, friend=owner)
+        
+        single_verify = False
+        if contact_verify != []:
+            single_verify = SingleChat.objects.filter(contact=contact_verify[0]).exists()
+
         if not singlechat:
-            if single_chat_serializer.is_valid():
-                single_chat_serializer.save()
-                return Response(single_chat_serializer.data, status=status.HTTP_201_CREATED)
-            return Response(single_chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if not single_verify:
+                if single_chat_serializer.is_valid():
+                    single_chat_serializer.save()
+                    return Response(single_chat_serializer.data, status=status.HTTP_201_CREATED)
+                return Response(single_chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Singlechat already exists."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Singlechat already exists."}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -177,7 +189,7 @@ class MessageView(APIView):
         '''
         body: {
             "sent_by": 1,
-            "content": ""
+            "content": "Oi tudo bem?"
         }
         '''
         

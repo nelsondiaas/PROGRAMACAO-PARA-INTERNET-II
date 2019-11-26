@@ -5,22 +5,6 @@ from core.models import *
 
 User = get_user_model()
 
-'''
-class SingleChatHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
-    
-    def get_url(self, obj, view_name, request, format):
-        
-        if obj.pk is None:
-            return None
- 
-        url_kwargs = {
-            'pk_contact': obj.contact_id,
-            'pk_singlechat': obj.id
-        }
-
-        return self.reverse(view_name, kwargs=url_kwargs, request=request, format=format)
-'''
-
 
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
@@ -49,11 +33,11 @@ class ProfileDetailViewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     email = serializers.CharField(source='user.email')
     contacts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name="contact-detail-view")
-    singlechat = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="profile-siglechat-list")
+    singlechats = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="profile-siglechat-list")
 
     class Meta:
         model = Profile
-        fields = ['pk', 'username', 'email', 'status', 'contacts', 'singlechat']
+        fields = ['pk', 'username', 'email', 'status', 'contacts', 'singlechats']
 
     def patch(self, instance, validated_data):
         instance.status = validated_data.get('status', instance.status)
