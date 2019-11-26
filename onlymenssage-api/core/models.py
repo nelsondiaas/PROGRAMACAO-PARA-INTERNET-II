@@ -11,15 +11,10 @@ class Profile(models.Model):
     class Meta:
         ordering = ['user']
 
-
 class Contact(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="contacts")
     friend = models.ForeignKey(Profile, on_delete=models.CASCADE)
     date_added = models.DateTimeField(auto_now_add=True)
-
-    @property
-    def get_contacts(self):
-        return "http://localhost:8000/api/v1/profiles/{}/".format(self.friend.user.pk)
     
     class Meta:
         ordering = ['date_added']

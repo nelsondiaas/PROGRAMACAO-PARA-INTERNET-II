@@ -5,6 +5,21 @@ from core.models import *
 
 User = get_user_model()
 
+'''
+class SingleChatHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
+    
+    def get_url(self, obj, view_name, request, format):
+        
+        if obj.pk is None:
+            return None
+ 
+        url_kwargs = {
+            'pk_contact': obj.contact_id,
+            'pk_singlechat': obj.id
+        }
+
+        return self.reverse(view_name, kwargs=url_kwargs, request=request, format=format)
+'''
 
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
@@ -32,7 +47,7 @@ class ProfileListViewSerializer(serializers.ModelSerializer):
 class ProfileDetailViewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     email = serializers.CharField(source='user.email')
-    contacts = serializers.SlugRelatedField(many=True, read_only=True, slug_field="get_contacts")
+    contacts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name="contact-detail-view")
 
     class Meta:
         model = Profile
@@ -53,16 +68,18 @@ class ContactSerializer(serializers.ModelSerializer):
 class ContactDetailSerializer(serializers.ModelSerializer):
     profile = serializers.HyperlinkedRelatedField(many=False, read_only=True, view_name="profile-detail-view")
     friend = serializers.HyperlinkedRelatedField(many=False, read_only=True, view_name="profile-detail-view")
+    add_singlechat = serializers.HyperlinkedIdentityField(read_only=True, view_name="singlechat-view")
+    singlechat = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="singlechat-list-view")
     
     class Meta:
         model = Contact
-        fields = ['pk', 'profile', 'friend', 'date_added']
+        fields = ['pk', 'profile', 'friend', 'add_singlechat', 'singlechat', 'date_added']
 
 
 class SingleChatViewSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = SingleChat
-        fields = ['contact', 'date_created']
+        fields = ['pk', 'status', 'contact', 'date_created']
 
 

@@ -77,7 +77,7 @@ class ProfileDetailView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class ContactView(APIView):
+class ContactCreateView(APIView):
 
     def get_object(self, obj, pk):
         try:
@@ -88,71 +88,79 @@ class ContactView(APIView):
     def post(self, request, pk_sender, pk_target, format=None):
         sender = self.get_object(Profile, pk_sender)
         target = self.get_object(Profile, pk_target)
-        request.data['profile'] = seder.pk;
-        request.data['friend'] = target.pk;n
+        request.data['profile'] = sender.pk
+        request.data['friend'] = target.pk
         contact_serializer = ContactSerializer(data=request.data)
         if contact_serializer.is_valid():
             contact_serializer.save()
             return Response(contact_serializer.data, status=status.HTTP_201_CREATED)
         return Response(contact_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
-class ContactDetailView(Paginator, APIView):
+
+class ContactView(Paginator, APIView):
 
     pagination_class = PageNumberPagination
 
+    def get(self, request, format=None):
+        contacts = Contact.objects.get_queryset().order_by('id')
+        page = self.paginate_queryset(contacts)
+        context = {'request': request}
+        contact_serializer = ContactSerializer(contacts, context=context, many=True)
+        return self.get_paginated_response(contact_serializer.data)
+
+
+class ContactDetailView(APIView):
+    
     def get_object(self, obj, pk):
         try:
-            profile = obj.objects.get(pk=pk)
-            try:
-                return Contact.objects.filter(profile=profile).all()
-            except Contact.DoesNotExist:
-                raise Http404
+            return obj.objects.get(pk=pk)
         except obj.DoesNotExist:
             raise Http404
     
     def get(self, request, pk, format=None):
-        contacts = self.get_object(Profile, pk)
-        page = self.paginate_queryset(contacts)
+        contact = self.get_object(Contact, pk)
         context = {'request': request}
-        contact_serializer = ContactDetailSerializer(contacts, context=context, many=True)
-        return self.get_paginated_response(contact_serializer.data)
+        contact_serializer = ContactDetailSerializer(contact, context=context, many=False)
+        return Response(contact_serializer.data, status=status.HTTP_200_OK)
 
 
 class SingleChatView(APIView):
 
-    def get_object(self, obj, pk_profile, pk_contact):
+    def get_object(self, obj, pk):
         try:
-            profile = obj.objects.get(pk=pk_profile)
-            try:
-                return Contact.objects.get(profile=profile, pk=pk_contact)
-            except Contact.DoesNotExist:
-                raise Http404
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+    
+    def post(self, request, pk, format=None):
+        contact = self.get_object(Contact, pk)
+        singlechat = SingleChat.objects.filter(contact=contact).exists()
+        request.data['contact'] = contact.pk
+        single_chat_serializer = SingleChatViewSerializer(data=request.data)
+        if not singlechat:
+            if single_chat_serializer.is_valid():
+                single_chat_serializer.save()
+                return Response(single_chat_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(single_chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Singlechat already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SingleChatList(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
         except obj.DoesNotExist:
             raise Http404
 
-    def post(self, request, pk_profile, pk_contact, format=None):
-        contact = self.get_object(Profile, pk_profile, pk_contact)
-        request.data['contact'] = contact.pk
-        single_chat_serializer = SingleChatViewSerializer(data=request.data)
-        if single_chat_serializer.is_valid():
-            single_chat_serializer.save()
-            return Response(single_chat_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(single_chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ProfileSingleChatList(APIView):
-
     def get(self, request, pk, format=None):
-        profile = Profile.objects.get(pk=pk)
-        contacts = Contact.objects.filter(profile=profile)
-
-        list_singlechat = []
-        for contact in contacts:
-            single_chat = SingleChat.objects.filter(contact=contact)
-            for singlechat in single_chat:
-                list_singlechat.append(singlechat)
-        singlechat_serializer = SingleChatViewSerializer(list_singlechat, many=True)
+        single_chat = SingleChat.objects.all()
+        singlechat = []
+        for single in single_chat:
+            if single.contact.pk == pk:
+                singlechat.append(single)
+        context = {'request': request}
+        singlechat_serializer = SingleChatViewSerializer(singlechat, context=context, many=True)
         return Response(singlechat_serializer.data, status=status.HTTP_200_OK)
 
 

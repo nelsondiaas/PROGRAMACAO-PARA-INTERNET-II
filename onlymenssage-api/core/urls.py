@@ -11,13 +11,22 @@ urlpatterns = [
     path('api/v1/profiles/', ProfileListView.as_view(), name='profile-list-view'),
 
     path('api/v1/profiles/<int:pk>/', ProfileDetailView.as_view(), name='profile-detail-view'),
+
+    path('api/v1/contacts/', ContactView.as_view(), name='contact-list-view'),
+
+    path('api/v1/contacts/<int:pk>/', ContactDetailView.as_view(), name='contact-detail-view'),
+
+    path('api/v1/profiles/<int:pk_sender>/contacts/<int:pk_target>/', ContactCreateView.as_view(), name='contact-create-view'),
+
+    path('api/v1/contacts/<int:pk>/singlechats/', SingleChatView.as_view(), name='singlechat-view'),
+
+    path('api/v1/contacts/singlechats/<int:pk>/', SingleChatList.as_view(), name='singlechat-list-view'),
+
+    #path('api/v1/contacts/<int:pk_contact>/singlechats/<int:pk_singlechat>/', SingleChatList.as_view(), name='singlechat-list-view'),
     
-    path('api/v1/profiles/<int:pk_sender>/contacts/<int:pk_target>/', ContactView.as_view(), name='contact-view'),
+
+    #path('api/v1/contacts/<int:pk>/', ContactDetailView.as_view(), name='contact-detail-view'),
     
     path('api/v1/profiles-contacts/<int:pk>/', ContactDetailView.as_view(), name='contact-detail'),
-
-    path('api/v1/profiles/<int:pk_profile>/singlechat/<int:pk_contact>/', SingleChatView.as_view(), name='singlechat-view'),
-
-    path('api/v1/profiles-singlechats/<int:pk>/', ProfileSingleChatList.as_view(), name='profile-singlechat-list'),
 
 ]
