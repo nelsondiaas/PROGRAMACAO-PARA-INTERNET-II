@@ -26,4 +26,6 @@ urlpatterns = [
 
     path('api/v1/singlechats/messages/<int:pk>/', MessageList.as_view(), name='message-list-view'),
 
+    path('api/v1/profiles/<int:pk>/singlechats/', ProfileSigleChatList.as_view(), name='profile-siglechat-list'),
+
 ]

@@ -49,10 +49,11 @@ class ProfileDetailViewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     email = serializers.CharField(source='user.email')
     contacts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name="contact-detail-view")
+    singlechat = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="profile-siglechat-list")
 
     class Meta:
         model = Profile
-        fields = ['pk', 'username', 'email', 'status', 'contacts']
+        fields = ['pk', 'username', 'email', 'status', 'contacts', 'singlechat']
 
     def patch(self, instance, validated_data):
         instance.status = validated_data.get('status', instance.status)
@@ -70,11 +71,10 @@ class ContactDetailSerializer(serializers.ModelSerializer):
     profile = serializers.HyperlinkedRelatedField(many=False, read_only=True, view_name="profile-detail-view")
     friend = serializers.HyperlinkedRelatedField(many=False, read_only=True, view_name="profile-detail-view")
     add_singlechat = serializers.HyperlinkedIdentityField(read_only=True, view_name="singlechat-view")
-    singlechat = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="singlechat-list-view")
     
     class Meta:
         model = Contact
-        fields = ['pk', 'profile', 'friend', 'add_singlechat', 'singlechat', 'date_added']
+        fields = ['pk', 'profile', 'friend', 'add_singlechat', 'date_added']
 
 
 class SingleChatViewSerializer(serializers.ModelSerializer):

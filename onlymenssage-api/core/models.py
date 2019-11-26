@@ -27,7 +27,18 @@ class Chat(models.Model):
 class SingleChat(Chat):
     status = models.BooleanField(default=False)
     contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
+    
+    @property
+    def add_status(self):
+        self.status = True
+        instance = self
+        instance.save()
 
+    def __str__(self):
+        return "Author: {}, Friend: {}".format(
+            self.contact.profile.user.username, 
+            self.contact.friend.user.username)
+    
 
 class GroupChat(Chat):
     owner = models.ForeignKey(Profile, on_delete=models.CASCADE)

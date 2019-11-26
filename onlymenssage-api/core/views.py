@@ -116,7 +116,7 @@ class ContactDetailView(APIView):
             return obj.objects.get(pk=pk)
         except obj.DoesNotExist:
             raise Http404
-    
+            
     def get(self, request, pk, format=None):
         contact = self.get_object(Contact, pk)
         context = {'request': request}
@@ -136,7 +136,8 @@ class SingleChatView(APIView):
         contact = self.get_object(Contact, pk)
         singlechat = SingleChat.objects.filter(contact=contact).exists()
         request.data['contact'] = contact.pk
-        single_chat_serializer = SingleChatViewSerializer(data=request.data)
+        context = {'request': request}
+        single_chat_serializer = SingleChatViewSerializer(data=request.data, context=context)
         if not singlechat:
             if single_chat_serializer.is_valid():
                 single_chat_serializer.save()
@@ -152,7 +153,7 @@ class SingleChatList(APIView):
             return obj.objects.get(pk=pk)
         except obj.DoesNotExist:
             raise Http404
-
+    
     def get(self, request, pk, format=None):
         single_chat = SingleChat.objects.all()
         singlechat = []
@@ -187,6 +188,8 @@ class MessageView(APIView):
         sent_by = request.data['sent_by']
         
         if contact.profile.pk == sent_by or contact.friend.pk == sent_by:
+            if not single_chat.status:
+                single_chat.add_status
             message_serializer = MessageViewSerializer(data=request.data)
             if message_serializer.is_valid():
                 message_serializer.save()
@@ -202,12 +205,43 @@ class MessageList(APIView):
             return obj.objects.get(pk=pk)
         except obj.DoesNotExist:
             raise Http404
-
+    
     def get(self, request, pk, format=None):
         messages = Message.objects.filter(chat=pk)
         context = {'request': request}
         messages_serializer = MessageViewSerializer(messages, context=context, many=True)
         return Response(messages_serializer.data, status=status.HTTP_200_OK)
+
+
+class ProfileSigleChatList(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        profile = Profile.objects.get(pk=pk)
+        
+        owner = Contact.objects.filter(profile=profile)
+        friend = Contact.objects.filter(friend=profile)
+
+        single_chat = SingleChat.objects.all()
+
+        single_chat_list = []
+
+        for single in single_chat:
+            if single.contact in owner:
+                single_chat_list.append(single)
+
+            if single.contact in friend:
+                if single.status:
+                    single_chat_list.append(single)
+
+        context = {'request': request}
+        single_chat_serializer = SingleChatViewSerializer(single_chat_list, context=context, many=True)
+        return Response(single_chat_serializer.data, status=status.HTTP_200_OK)
 
 
 class ApiRoot(APIView):
