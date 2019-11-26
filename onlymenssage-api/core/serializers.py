@@ -21,6 +21,7 @@ class SingleChatHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
         return self.reverse(view_name, kwargs=url_kwargs, request=request, format=format)
 '''
 
+
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     password = serializers.CharField(source='user.password')
@@ -77,9 +78,16 @@ class ContactDetailSerializer(serializers.ModelSerializer):
 
 
 class SingleChatViewSerializer(serializers.ModelSerializer):
+    send_message = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="message-view")
+    messages = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="message-list-view")
 
     class Meta:
         model = SingleChat
-        fields = ['pk', 'status', 'contact', 'date_created']
+        fields = ['pk', 'chat_ptr_id', 'status', 'contact', 'send_message', 'messages', 'date_created']
 
 
+class MessageViewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Message
+        fields = ['pk', 'chat', 'sent_by', 'content', 'timestamp']

@@ -131,7 +131,7 @@ class SingleChatView(APIView):
             return obj.objects.get(pk=pk)
         except obj.DoesNotExist:
             raise Http404
-    
+
     def post(self, request, pk, format=None):
         contact = self.get_object(Contact, pk)
         singlechat = SingleChat.objects.filter(contact=contact).exists()
@@ -162,6 +162,52 @@ class SingleChatList(APIView):
         context = {'request': request}
         singlechat_serializer = SingleChatViewSerializer(singlechat, context=context, many=True)
         return Response(singlechat_serializer.data, status=status.HTTP_200_OK)
+
+
+class MessageView(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+    
+    def post(self, request, pk, format=None):
+        '''
+        body: {
+            "sent_by": 1,
+            "content": ""
+        }
+        '''
+        
+        single_chat = SingleChat.objects.get(pk=pk)
+        contact = self.get_object(Contact, single_chat.contact.pk)
+        chat = single_chat.chat_ptr_id
+        request.data['chat'] = chat
+        sent_by = request.data['sent_by']
+        
+        if contact.profile.pk == sent_by or contact.friend.pk == sent_by:
+            message_serializer = MessageViewSerializer(data=request.data)
+            if message_serializer.is_valid():
+                message_serializer.save()
+                return Response(message_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(message_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "This profile on nonexistent contact"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MessageList(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        messages = Message.objects.filter(chat=pk)
+        context = {'request': request}
+        messages_serializer = MessageViewSerializer(messages, context=context, many=True)
+        return Response(messages_serializer.data, status=status.HTTP_200_OK)
 
 
 class ApiRoot(APIView):

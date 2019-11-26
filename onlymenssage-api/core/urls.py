@@ -22,11 +22,8 @@ urlpatterns = [
 
     path('api/v1/contacts/singlechats/<int:pk>/', SingleChatList.as_view(), name='singlechat-list-view'),
 
-    #path('api/v1/contacts/<int:pk_contact>/singlechats/<int:pk_singlechat>/', SingleChatList.as_view(), name='singlechat-list-view'),
-    
+    path('api/v1/singlechats/<int:pk>/message/', MessageView.as_view(), name='message-view'),
 
-    #path('api/v1/contacts/<int:pk>/', ContactDetailView.as_view(), name='contact-detail-view'),
-    
-    path('api/v1/profiles-contacts/<int:pk>/', ContactDetailView.as_view(), name='contact-detail'),
+    path('api/v1/singlechats/messages/<int:pk>/', MessageList.as_view(), name='message-list-view'),
 
 ]
