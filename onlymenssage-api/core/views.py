@@ -282,9 +282,23 @@ class GroupChatList(APIView):
     
     def get(self, request, pk, format=None):
         profile = self.get_object(Profile, pk)
+
         group_chat = GroupChat.objects.filter(owner=profile)
+
+        all_groupmember = GroupMember.objects.all()
+        
+        edit_groupchat = []
+
+        for member in all_groupmember:
+            if member.contact.friend == profile :
+                find_groupchat = GroupChat.objects.get(chat_ptr_id=member.chat.id)
+                edit_groupchat.append(find_groupchat)
+        
+        for groupchat in group_chat:
+            edit_groupchat.append(groupchat)
+
         context = {'request': request}
-        group_chat_serializer = GroupChatListViewSerializer(group_chat, context=context, many=True)
+        group_chat_serializer = GroupChatListViewSerializer(edit_groupchat, context=context, many=True)
         return Response(group_chat_serializer.data, status=status.HTTP_200_OK)
 
 
@@ -311,6 +325,13 @@ class GroupMemberView(APIView):
             return obj.objects.get(pk=pk)
         except obj.DoesNotExist:
             raise Http404
+    
+    '''
+    Fazer uma feature que verificar se esse profile é is_admin
+    do grupo, caso ele seja, o mesmo podera adicionar seus contatos 
+    ao groupchat, criado por outro profile.
+
+    '''
 
     def post(self, request, pk, format=None):
         request.data['chat'] = pk
