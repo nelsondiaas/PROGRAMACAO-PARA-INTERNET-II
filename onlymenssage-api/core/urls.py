@@ -22,9 +22,9 @@ urlpatterns = [
 
     path('api/v1/contacts/singlechats/<int:pk>/', SingleChatList.as_view(), name='singlechat-list-view'),
 
-    path('api/v1/singlechats/<int:pk>/message/', MessageView.as_view(), name='message-view'),
+    path('api/v1/singlechats/<int:pk>/messages/', MessageSingleChatView.as_view(), name='message-singlechat-view'),
 
-    path('api/v1/singlechats/messages/<int:pk>/', MessageList.as_view(), name='message-list-view'),
+    path('api/v1/singlechats/messages/<int:pk>/', MessageSingleChatList.as_view(), name='message-singlechat-list-view'),
 
     path('api/v1/profiles/<int:pk>/singlechats/', ProfileSigleChatList.as_view(), name='profile-siglechat-list'),
 
@@ -37,5 +37,9 @@ urlpatterns = [
     path('api/v1/groupchats/<int:pk>/groupmembers/', GroupMemberView.as_view(), name='groupmember-view'),
 
     path('api/v1/groupchats/groupmembers/<int:pk>/', GroupMemberList.as_view(), name='groupmember-list-view'),
+
+    path('api/v1/groupchats/<int:pk>/messages/', MessageGroupChatView.as_view(), name='message-groupchat-view'),
+
+    path('api/v1/groupchats/messages/<int:pk>/', MessageGroupChatList.as_view(), name='message-groupchat-list-view'),
     
 ]

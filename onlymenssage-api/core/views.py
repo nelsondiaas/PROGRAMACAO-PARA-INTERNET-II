@@ -176,7 +176,7 @@ class SingleChatList(APIView):
         return Response(singlechat_serializer.data, status=status.HTTP_200_OK)
 
 
-class MessageView(APIView):
+class MessageSingleChatView(APIView):
 
     def get_object(self, obj, pk):
         try:
@@ -209,7 +209,7 @@ class MessageView(APIView):
         return Response({"error": "This profile on nonexistent contact"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MessageList(APIView):
+class MessageSingleChatList(APIView):
 
     def get_object(self, obj, pk):
         try:
@@ -370,6 +370,63 @@ class GroupMemberList(APIView):
         context = {'request': request}
         group_member_serializer = GroupMemberViewSerializer(group_member, context=context, many=True)
         return Response(group_member_serializer.data, status=status.HTTP_200_OK)
+
+
+
+class MessageGroupChatView(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+    
+    def post(self, request, pk, format=None):
+        '''
+        body: {
+            "sent_by": 1,
+            "content": "Oi tudo bem?"
+        }
+        '''
+        
+        group_chat = GroupChat.objects.get(pk=pk)
+
+        request.data['chat'] = pk
+
+        sent_by = request.data['sent_by']
+
+        group_member = GroupMember.objects.filter(chat=pk)
+
+        is_member = False
+
+        for member in group_member:
+            if (member.contact.profile.pk == sent_by or 
+                member.contact.friend.pk == sent_by):
+                is_member = True
+
+        message_group_serializer = MessageViewSerializer(data=request.data)
+
+        if is_member:
+            if message_group_serializer.is_valid():
+                message_group_serializer.save()
+                return Response(message_group_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(message_group_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "This profile is not a member of this group"}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class MessageGroupChatList(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        messages = Message.objects.filter(chat=pk)
+        context = {'request': request}
+        messages_serializer = MessageViewSerializer(messages, context=context, many=True)
+        return Response(messages_serializer.data, status=status.HTTP_200_OK)
 
 
 class ApiRoot(APIView):

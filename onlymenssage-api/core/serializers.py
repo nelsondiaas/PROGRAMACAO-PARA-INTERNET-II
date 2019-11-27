@@ -64,8 +64,8 @@ class ContactDetailSerializer(serializers.ModelSerializer):
 
 
 class SingleChatViewSerializer(serializers.ModelSerializer):
-    send_message = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="message-view")
-    messages = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="message-list-view")
+    send_message = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="message-singlechat-view")
+    messages = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="message-singlechat-list-view")
 
     class Meta:
         model = SingleChat
@@ -104,10 +104,12 @@ class GroupChatListViewSerializer(serializers.ModelSerializer):
 class GroupChatViewSerializer(serializers.ModelSerializer):
     add_member = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="groupmember-view")
     members = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="groupmember-list-view")
-
+    send_message = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="message-groupchat-view")
+    messages = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="message-groupchat-list-view")
+    
     class Meta:
         model = GroupChat
-        fields = ['pk', 'chat_ptr_id', 'owner', 'title', 'add_member', 'members', 'date_created']
+        fields = ['pk', 'chat_ptr_id', 'owner', 'title', 'add_member', 'members', 'send_message', 'messages', 'date_created']
 
 
 class GroupMemberViewSerializer(serializers.ModelSerializer):
