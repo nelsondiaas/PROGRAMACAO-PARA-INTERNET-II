@@ -36,7 +36,7 @@ class ProfileDetailViewSerializer(serializers.ModelSerializer):
     singlechats = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="profile-siglechat-list")
     create_groupchat = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="groupchat-view")
     groupchats = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="groupchat-list-view")
-
+    
     class Meta:
         model = Profile
         fields = ['pk', 'username', 'email', 'status', 'singlechats', 'create_groupchat', 'groupchats', 'contacts']
@@ -77,6 +77,28 @@ class MessageViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['pk', 'chat', 'sent_by', 'content', 'timestamp']
+
+
+class GroupChatHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
+    
+    def get_url(self, obj, view_name, request, format):
+        
+        if obj.pk is None:
+            return None
+      
+        url_kwargs = {
+            'pk_profile': obj.owner_id,
+            'pk_groupchat': obj.id
+        }
+        return self.reverse(view_name, kwargs=url_kwargs, request=request, format=format)
+
+
+class GroupChatListViewSerializer(serializers.ModelSerializer):
+    url = GroupChatHyperlinkedIdentityField(view_name="groupchat-detail-view")
+
+    class Meta:
+        model = GroupChat
+        fields = ['url']
 
 
 class GroupChatViewSerializer(serializers.ModelSerializer):
