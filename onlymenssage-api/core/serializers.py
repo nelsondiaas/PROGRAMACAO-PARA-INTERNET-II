@@ -121,7 +121,12 @@ class GroupChatViewSerializer(serializers.ModelSerializer):
 
 
 class GroupMemberViewSerializer(serializers.ModelSerializer):
+    add_admin = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="groupmember-admin-view")
 
     class Meta:
         model = GroupMember
-        fields = ['pk',  'chat', 'contact']
+        fields = ['pk',  'is_admin', 'chat', 'contact', 'add_admin']
+
+    def patch(self, instance, validated_data):
+        instance.is_admin = validated_data.get('is_admin', instance.is_admin)
+        return instance.save()

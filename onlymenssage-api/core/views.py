@@ -327,39 +327,75 @@ class GroupMemberView(APIView):
         except obj.DoesNotExist:
             raise Http404
     
-    '''
-    Fazer uma feature que verificar se esse profile é is_admin
-    do grupo, caso ele seja, o mesmo podera adicionar seus contatos 
-    ao groupchat, criado por outro profile.
-
-    '''
-
     def post(self, request, pk, format=None):
+        '''
+        body: {
+            "contact": "pk"
+        }
+
+        '''
+
         request.data['chat'] = pk
 
         contact = self.get_object(Contact, request.data['contact'])
         group_chat = self.get_object(GroupChat, pk)
-        profile = self.get_object(Profile, group_chat.owner.pk)
-        my_contacts = Contact.objects.filter(profile=profile)
 
-        is_my_contact = False
+        owner = self.get_object(Profile, group_chat.owner.pk)
+        my_contacts = Contact.objects.filter(profile=owner)
         
-        if contact in my_contacts:
-            is_my_contact = True
+        is_owner = False
 
-        group_member_serializer = GroupMemberViewSerializer(data=request.data)
+        if owner.pk == contact.profile.pk:
+            is_owner = True
+
+        if is_owner:
+
+            is_my_contact = False
         
-        if is_my_contact:
-            if group_member_serializer.is_valid():
-                group_member_serializer.save()
-                return Response(group_member_serializer.data, status=status.HTTP_201_CREATED)
-            return Response(group_member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"error": "This contact does not exist in my contact list"}, status=status.HTTP_400_BAD_REQUEST)
+            if contact in my_contacts:
+                is_my_contact = True
+
+            context = {'request': request}
+            group_member_serializer = GroupMemberViewSerializer(data=request.data, context=context)
+        
+            if is_my_contact:
+                if group_member_serializer.is_valid():
+                    group_member_serializer.save()
+                    return Response(group_member_serializer.data, status=status.HTTP_201_CREATED)
+                return Response(group_member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "This contact does not exist in my contact list"}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile = Profile.objects.get(pk=contact.profile.pk)
+        profile_contacts = Contact.objects.filter(profile=profile)
+        group_member = GroupMember.objects.all()
+
+        member_admin = None
+
+        for member in group_member:
+            if (member.contact.friend == profile and
+                member.chat.pk == pk and member.is_admin):
+                member_admin = member
+                break
+        
+        if member_admin is not None:
+
+            is_my_contact = False
+
+            if contact in profile_contacts:
+                is_my_contact = True
+
+            context = {'request': request}
+            group_member_serializer = GroupMemberViewSerializer(data=request.data, context=context)
+
+            if is_my_contact:
+                if group_member_serializer.is_valid():
+                    group_member_serializer.save()
+                    return Response(group_member_serializer.data, status=status.HTTP_201_CREATED)
+                return Response(group_member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "This contact does not exist in my contact list"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "you are not admin, so you cannot perform this operation"}, status=status.HTTP_400_BAD_REQUEST)
+
     
-    def patch(self, request, pk, format=None):
-        pass
-
-
 class GroupMemberList(APIView):
 
     def get_object(self, obj, pk):
@@ -374,6 +410,37 @@ class GroupMemberList(APIView):
         context = {'request': request}
         group_member_serializer = GroupMemberViewSerializer(group_member, context=context, many=True)
         return Response(group_member_serializer.data, status=status.HTTP_200_OK)
+
+
+class GroupMemberAdminView(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+
+    def patch(self, request, pk, format=None):
+        request.data['is_admin'] = True
+
+        member = GroupMember.objects.get(pk=pk)
+        group_chat = self.get_object(GroupChat, member.chat.pk)
+        
+        is_admin = False
+
+        if group_chat.owner.pk == member.contact.profile.pk:
+            is_admin = True
+
+        context = {'request': request}
+        group_member_serializer = GroupMemberViewSerializer(
+        member, data=request.data, context=context, partial=True)
+
+        if is_admin:
+            if group_member_serializer.is_valid():
+                group_member_serializer.save()
+                return Response(group_member_serializer.data, status=status.HTTP_200_OK)
+            return Response(group_member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Only the group owner can add a member as admin"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MessageGroupChatView(APIView):
