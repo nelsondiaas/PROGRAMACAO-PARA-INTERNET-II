@@ -304,6 +304,53 @@ class GroupChatDetail(APIView):
         return Response(group_chat_serializer.data, status=status.HTTP_200_OK)
 
 
+class GroupMemberView(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+
+    def post(self, request, pk, format=None):
+        request.data['chat'] = pk
+
+        contact = self.get_object(Contact, request.data['contact'])
+        group_chat = self.get_object(GroupChat, pk)
+        profile = self.get_object(Profile, group_chat.owner.pk)
+        my_contacts = Contact.objects.filter(profile=profile)
+
+        is_my_contact = False
+        
+        if contact in my_contacts:
+            is_my_contact = True
+
+        group_member_serializer = GroupMemberViewSerializer(data=request.data)
+        
+        if is_my_contact:
+            if group_member_serializer.is_valid():
+                group_member_serializer.save()
+                return Response(group_member_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(group_member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "This contact does not exist in my contact list"}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class GroupMemberList(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        chat = self.get_object(GroupChat, pk)
+        group_member = GroupMember.objects.filter(chat=chat)
+        context = {'request': request}
+        group_member_serializer = GroupMemberViewSerializer(group_member, context=context, many=True)
+        return Response(group_member_serializer.data, status=status.HTTP_200_OK)
+
+
 class ApiRoot(APIView):
 
     def get(self, request, *args, **kwargs):

@@ -34,4 +34,8 @@ urlpatterns = [
 
     path('api/v1/profiles/<int:pk_profile>/groupchats/<int:pk_groupchat>/', GroupChatDetail.as_view(), name='groupchat-detail-view'),
 
+    path('api/v1/groupchats/<int:pk>/groupmembers/', GroupMemberView.as_view(), name='groupmember-view'),
+
+    path('api/v1/groupchats/groupmembers/<int:pk>/', GroupMemberList.as_view(), name='groupmember-list-view'),
+    
 ]

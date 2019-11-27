@@ -102,7 +102,16 @@ class GroupChatListViewSerializer(serializers.ModelSerializer):
 
 
 class GroupChatViewSerializer(serializers.ModelSerializer):
+    add_member = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="groupmember-view")
+    members = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="groupmember-list-view")
 
     class Meta:
         model = GroupChat
-        fields = ['pk', 'chat_ptr_id', 'owner', 'title', 'date_created']
+        fields = ['pk', 'chat_ptr_id', 'owner', 'title', 'add_member', 'members', 'date_created']
+
+
+class GroupMemberViewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GroupMember
+        fields = ['pk',  'chat', 'contact']

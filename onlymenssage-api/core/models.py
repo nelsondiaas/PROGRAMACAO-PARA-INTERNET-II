@@ -44,7 +44,7 @@ class SingleChat(Chat):
 class GroupChat(Chat):
     owner = models.ForeignKey(Profile, on_delete=models.CASCADE)
     title = models.CharField(max_length=64)
-
+    
 
 class GroupMember(models.Model):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name="members")
