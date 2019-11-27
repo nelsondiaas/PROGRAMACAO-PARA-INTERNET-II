@@ -34,7 +34,7 @@ class SingleChat(Chat):
         self.status = True
         instance = self
         instance.save()
-    
+
     def __str__(self):
         return "Author: {}, Friend: {}".format(
             self.contact.profile.user.username, 
@@ -47,6 +47,7 @@ class GroupChat(Chat):
 
 
 class GroupMember(models.Model):
+    is_admin = models.BooleanField(default=False)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name="members")
     contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
 

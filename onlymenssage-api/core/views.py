@@ -265,7 +265,8 @@ class GroupChatView(APIView):
         '''
 
         request.data['owner'] = pk
-        group_chat_serializer = GroupChatViewSerializer(data=request.data)
+        context = {'request': request}
+        group_chat_serializer = GroupChatViewSerializer(data=request.data, context=context)
         if group_chat_serializer.is_valid():
             group_chat_serializer.save()
             return Response(group_chat_serializer.data, status=status.HTTP_201_CREATED)
@@ -354,7 +355,10 @@ class GroupMemberView(APIView):
                 return Response(group_member_serializer.data, status=status.HTTP_201_CREATED)
             return Response(group_member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "This contact does not exist in my contact list"}, status=status.HTTP_400_BAD_REQUEST)
-        
+    
+    def patch(self, request, pk, format=None):
+        pass
+
 
 class GroupMemberList(APIView):
 
@@ -370,7 +374,6 @@ class GroupMemberList(APIView):
         context = {'request': request}
         group_member_serializer = GroupMemberViewSerializer(group_member, context=context, many=True)
         return Response(group_member_serializer.data, status=status.HTTP_200_OK)
-
 
 
 class MessageGroupChatView(APIView):
