@@ -11,6 +11,7 @@ class Profile(models.Model):
     class Meta:
         ordering = ['user']
 
+
 class Contact(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="contacts")
     friend = models.ForeignKey(Profile, on_delete=models.CASCADE)

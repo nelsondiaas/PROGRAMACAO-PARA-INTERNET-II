@@ -145,7 +145,7 @@ class SingleChatView(APIView):
         contact_verify = Contact.objects.filter(profile=friend, friend=owner)
 
         single_verify = False
-        
+
         if len(contact_verify):
             single_verify = SingleChat.objects.filter(contact=contact_verify[0]).exists()
 
@@ -253,6 +253,44 @@ class ProfileSigleChatList(APIView):
         context = {'request': request}
         single_chat_serializer = SingleChatViewSerializer(single_chat_list, context=context, many=True)
         return Response(single_chat_serializer.data, status=status.HTTP_200_OK)
+
+
+class GroupChatView(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+
+    def post(self, request, pk, format=None):
+        '''
+        body: {
+            "title": "name groupchat" 
+        }
+        '''
+
+        request.data['owner'] = pk
+        group_chat_serializer = GroupChatViewSerializer(data=request.data)
+        if group_chat_serializer.is_valid():
+            group_chat_serializer.save()
+            return Response(group_chat_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(group_chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class GroupChatList(APIView):
+
+    def get_object(self, obj, pk):
+        try:
+            return obj.objects.get(pk=pk)
+        except obj.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        profile = Profile.objects.get(pk=pk)
+        group_chat = GroupChat.objects.filter(owner=profile)
+        context = {'request': request}
+        group_chat_serializer = GroupChatViewSerializer(group_chat, context=context, many=True)
+        return Response(group_chat_serializer.data, status=status.HTTP_200_OK)
 
 
 class ApiRoot(APIView):

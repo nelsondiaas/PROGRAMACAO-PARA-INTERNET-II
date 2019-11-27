@@ -34,10 +34,12 @@ class ProfileDetailViewSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source='user.email')
     contacts = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name="contact-detail-view")
     singlechats = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="profile-siglechat-list")
+    create_groupchat = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="groupchat-view")
+    groupchats = serializers.HyperlinkedIdentityField(many=False, read_only=True, view_name="groupchat-list-view")
 
     class Meta:
         model = Profile
-        fields = ['pk', 'username', 'email', 'status', 'contacts', 'singlechats']
+        fields = ['pk', 'username', 'email', 'status', 'singlechats', 'create_groupchat', 'groupchats', 'contacts']
 
     def patch(self, instance, validated_data):
         instance.status = validated_data.get('status', instance.status)
@@ -75,3 +77,10 @@ class MessageViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['pk', 'chat', 'sent_by', 'content', 'timestamp']
+
+
+class GroupChatViewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GroupChat
+        fields = ['pk', 'chat_ptr_id', 'owner', 'title', 'date_created']

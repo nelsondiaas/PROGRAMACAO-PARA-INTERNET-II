@@ -28,4 +28,8 @@ urlpatterns = [
 
     path('api/v1/profiles/<int:pk>/singlechats/', ProfileSigleChatList.as_view(), name='profile-siglechat-list'),
 
+    path('api/v1/profiles/<int:pk>/groupchats/', GroupChatView.as_view(), name='groupchat-view'),
+
+    path('api/v1/profiles/groupchats/<int:pk>/', GroupChatList.as_view(), name='groupchat-list-view'),
+
 ]
