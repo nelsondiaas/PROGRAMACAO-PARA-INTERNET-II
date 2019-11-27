@@ -220,7 +220,7 @@ class MessageSingleChatList(APIView):
     def get(self, request, pk, format=None):
         messages = Message.objects.filter(chat=pk)
         context = {'request': request}
-        messages_serializer = MessageViewSerializer(messages, context=context, many=True)
+        messages_serializer = MessageListSerializer(messages, context=context, many=True)
         return Response(messages_serializer.data, status=status.HTTP_200_OK)
 
 
@@ -425,7 +425,7 @@ class MessageGroupChatList(APIView):
     def get(self, request, pk, format=None):
         messages = Message.objects.filter(chat=pk)
         context = {'request': request}
-        messages_serializer = MessageViewSerializer(messages, context=context, many=True)
+        messages_serializer = MessageListSerializer(messages, context=context, many=True)
         return Response(messages_serializer.data, status=status.HTTP_200_OK)
 
 
