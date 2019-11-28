@@ -102,6 +102,7 @@ class ContactCreateView(APIView):
 
 class ContactView(Paginator, APIView):
 
+    permission_classes = [IsAuthenticated]
     pagination_class = PageNumberPagination
 
     def get(self, request, format=None):
@@ -114,6 +115,8 @@ class ContactView(Paginator, APIView):
 
 class ContactDetailView(APIView):
     
+    permission_classes = [IsAuthenticated]
+
     def get_object(self, obj, pk):
         try:
             return obj.objects.get(pk=pk)
@@ -129,6 +132,8 @@ class ContactDetailView(APIView):
 
 class SingleChatView(APIView):
 
+    permission_classes = [IsAuthenticated, ContactOwnerReadOnly]
+
     def get_object(self, obj, pk):
         try:
             return obj.objects.get(pk=pk)
@@ -137,6 +142,7 @@ class SingleChatView(APIView):
     
     def post(self, request, pk, format=None):
         contact = self.get_object(Contact, pk)
+        self.check_object_permissions(request, contact)
         singlechat = SingleChat.objects.filter(contact=contact).exists()
         request.data['contact'] = contact.pk
         context = {'request': request}
@@ -151,14 +157,14 @@ class SingleChatView(APIView):
 
         if len(contact_verify):
             single_verify = SingleChat.objects.filter(contact=contact_verify[0]).exists()
-
+        '''
         if not singlechat and not single_verify:
             if single_chat_serializer.is_valid():
                 single_chat_serializer.save()
                 return Response(single_chat_serializer.data, status=status.HTTP_201_CREATED)
             return Response(single_chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Singlechat already exists."}, status=status.HTTP_400_BAD_REQUEST)
-
+        '''
 
 class SingleChatList(APIView):
 
