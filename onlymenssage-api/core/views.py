@@ -79,6 +79,8 @@ class ProfileDetailView(APIView):
 
 class ContactCreateView(APIView):
 
+    permission_classes = [IsAuthenticated, ProfileOwnerReadOnly]
+
     def get_object(self, obj, pk):
         try:
             return obj.objects.get(pk=pk)
@@ -87,6 +89,7 @@ class ContactCreateView(APIView):
     
     def post(self, request, pk_sender, pk_target, format=None):
         sender = self.get_object(Profile, pk_sender)
+        self.check_object_permissions(request, sender)
         target = self.get_object(Profile, pk_target)
         request.data['profile'] = sender.pk
         request.data['friend'] = target.pk
