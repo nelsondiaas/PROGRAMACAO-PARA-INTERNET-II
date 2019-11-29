@@ -36,6 +36,7 @@ class Administrator(models.Model):
     def __str__(self):
         return "Administrator: {}".format(self.name)
 
+
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=60)
@@ -67,7 +68,7 @@ class Sale(models.Model):
     CALC = (
        (0.0, 0.0),
     )
-    
+
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="sales")
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="employee_sale")
     status = models.ForeignKey(Status, on_delete=models.CASCADE, related_name="status")
@@ -76,7 +77,7 @@ class Sale(models.Model):
 
     def __str__(self):
         return "Client: {}, Employee: {}, Total: $ {}, Status: {}".format(
-        self.client.name, self.employee.name, self.total, self.status)
+        self.client.name, self.employee.name, self.total, self.status.message)
     
 
 class Author(models.Model):
@@ -118,7 +119,7 @@ class Itemsale(models.Model):
     CALC = (
        (0.0, 0.0),
     )
-
+    
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="itemsales")
     amount = models.IntegerField()
     subtotal = models.FloatField(default=0.0, choices=CALC)

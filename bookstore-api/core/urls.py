@@ -6,6 +6,9 @@ urlpatterns = [
 
     path('', ApiRoot.as_view(), name=ApiRoot.name),
 
+    path('users/', UserListView.as_view(), name=UserListView.name),
+    path('users/<int:pk>/', UserDetail.as_view(), name=UserDetail.name),
+
     path('address/', AddressListView.as_view(), name=AddressListView.name),
     path('address/<int:pk>/', AddressDetail.as_view(), name=AddressDetail.name),
 
@@ -26,7 +29,7 @@ urlpatterns = [
 
     path('authors/', AuthorListView.as_view(), name=AuthorListView.name),
     path('authors/<int:pk>/', AuthorDetail.as_view(), name=AuthorDetail.name),
-    
+
     path('writes/', WriteListView.as_view(), name=WriteListView.name),
     path('writes/<int:pk>/', WriteDetail.as_view(), name=WriteDetail.name),
 

@@ -12,7 +12,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = User
-        fields = ['url', 'username', 'email']
+        fields = ['url', 'username', 'email', 'is_staff']
 
 
 class AddressSerializer(serializers.HyperlinkedModelSerializer):
@@ -44,7 +44,7 @@ class AdministratorSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         user_created = User.objects.create_user(
         username=validated_data['name'].split()[0],
-        email=validated_data['email'], password='admin@123')
+        email=validated_data['email'], password='admin@123', is_staff=True)
         return Administrator.objects.create(user=user_created, **validated_data)
 
 
@@ -57,7 +57,7 @@ class EmployeeSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         user_created = User.objects.create_user(
         username=validated_data['name'].split()[0],
-        email=validated_data['email'], password='admin@123')
+        email=validated_data['email'], password='admin@123', is_staff=True)
         return Employee.objects.create(user=user_created, **validated_data)
 
 
