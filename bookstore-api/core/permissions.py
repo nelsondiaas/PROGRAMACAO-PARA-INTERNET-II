@@ -2,7 +2,7 @@ from rest_framework import permissions
 from .models import *
 
 
-class AdressPermissions(permissions.BasePermission):
+class AddressPermissions(permissions.BasePermission):
     
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
@@ -28,7 +28,31 @@ class AdministratorPermissions(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         try:
-            if Administrator.objects.get(email=request.user.email):
+            if (Administrator.objects.get(email=request.user.email)):
                 return True
         except Administrator.DoesNotExist:
+            return False
+
+
+class SalePermissions(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        try:
+            if (Employee.objects.get(email=request.user.email)):
+                return True
+        except Employee.DoesNotExist:
+            return False
+
+
+class ItemsalePermissions(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        try:
+            if (Employee.objects.get(email=request.user.email)):
+                return True
+        except Employee.DoesNotExist:
             return False

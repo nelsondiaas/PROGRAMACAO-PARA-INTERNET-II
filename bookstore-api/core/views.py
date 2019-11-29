@@ -44,7 +44,7 @@ class AddressListView(ListCreateAPIView):
     queryset = Address.objects.get_queryset().order_by('id')
     serializer_class = AddressSerializer
 
-    permission_classes = [permissions.IsAuthenticated, AdressPermissions]
+    permission_classes = [permissions.IsAuthenticated, AddressPermissions]
 
 
 class AddressDetail(RetrieveUpdateDestroyAPIView):
@@ -52,15 +52,16 @@ class AddressDetail(RetrieveUpdateDestroyAPIView):
     queryset = Address.objects.get_queryset().order_by('id')
     serializer_class = AddressSerializer
 
-    permission_classes = [permissions.IsAuthenticated, AdressPermissions]
+    permission_classes = [permissions.IsAuthenticated, AddressPermissions]
 
 
 class AdministratorListView(ListCreateAPIView):
     name = 'administrator-list-view'
     queryset = Administrator.objects.get_queryset().order_by('id')
     serializer_class = AdministratorSerializer
-
-    permission_classes = [permissions.IsAuthenticated, AdministratorPermissions]
+    
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
 
 
 class AdministratorDetail(RetrieveUpdateDestroyAPIView):
@@ -68,11 +69,17 @@ class AdministratorDetail(RetrieveUpdateDestroyAPIView):
     queryset = Administrator.objects.get_queryset().order_by('id')
     serializer_class = AdministratorSerializer
 
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
+
 
 class EmployeeListView(ListCreateAPIView):
     name = 'employee-list-view'
     queryset = Employee.objects.get_queryset().order_by('id')
     serializer_class = EmployeeSerializer
+
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
 
 
 class EmployeeDetail(RetrieveUpdateDestroyAPIView):
@@ -80,23 +87,35 @@ class EmployeeDetail(RetrieveUpdateDestroyAPIView):
     queryset = Employee.objects.get_queryset().order_by('id')
     serializer_class = EmployeeSerializer
 
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
+
 
 class StatusListView(ListCreateAPIView):
     name = 'status-list-view'
     queryset = Status.objects.get_queryset().order_by('id')
     serializer_class = StatusSerializer
 
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
+
 
 class StatusDetail(RetrieveUpdateDestroyAPIView):
     name = 'status-detail'
     queryset = Status.objects.get_queryset().order_by('id')
-    serializer_class = StatusSerializer
-
-
+    serializer_class = StatusDetailSerializer
+    
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
+       
+    
 class GenreListView(ListCreateAPIView):
     name = 'genre-list-view'
     queryset = Genre.objects.get_queryset().order_by('id')
     serializer_class = GenreSerializer
+
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
 
 
 class GenreDetail(RetrieveUpdateDestroyAPIView):
@@ -104,11 +123,17 @@ class GenreDetail(RetrieveUpdateDestroyAPIView):
     queryset = Genre.objects.get_queryset().order_by('id')
     serializer_class = GenreSerializer
 
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
+
 
 class AuthorListView(ListCreateAPIView):
     name = 'author-list-view'
     queryset = Author.objects.get_queryset().order_by('id')
     serializer_class = AuthorSerializer
+
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
 
 
 class AuthorDetail(RetrieveUpdateDestroyAPIView):
@@ -116,11 +141,17 @@ class AuthorDetail(RetrieveUpdateDestroyAPIView):
     queryset = Author.objects.get_queryset().order_by('id')
     serializer_class = AuthorSerializer
 
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
+
 
 class WriteListView(ListCreateAPIView):
     name = 'write-list-view'
     queryset = Write.objects.get_queryset().order_by('id')
     serializer_class = WriteSerializer
+
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
 
 
 class WriteDetail(RetrieveUpdateDestroyAPIView):
@@ -128,11 +159,17 @@ class WriteDetail(RetrieveUpdateDestroyAPIView):
     queryset = Write.objects.get_queryset().order_by('id')
     serializer_class = WriteSerializer
 
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
+
 
 class BookListView(ListCreateAPIView):
     name = 'book-list-view'
     queryset = Book.objects.get_queryset().order_by('id')
     serializer_class = BookSerializer
+
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
 
 
 class BookDetail(RetrieveUpdateDestroyAPIView):
@@ -140,11 +177,18 @@ class BookDetail(RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.get_queryset().order_by('id')
     serializer_class = BookSerializer
 
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions]
+
 
 class SaleListView(ListCreateAPIView):
     name = 'sale-list-view'
     queryset = Sale.objects.get_queryset().order_by('id')
     serializer_class = SaleSerializer
+
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions | 
+    SalePermissions]
 
 
 class SaleDetail(RetrieveUpdateDestroyAPIView):
@@ -152,17 +196,29 @@ class SaleDetail(RetrieveUpdateDestroyAPIView):
     queryset = Sale.objects.get_queryset().order_by('id')
     serializer_class = SaleDetailSerializer
 
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions | 
+    SalePermissions]
+
 
 class ItemsaleListView(ListCreateAPIView):
     name = 'itemsale-list-view'
     queryset = Itemsale.objects.get_queryset().order_by('id')
     serializer_class = ItemsaleSerializer
 
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions | 
+    ItemsalePermissions]
+
 
 class ItemsaleDetail(RetrieveUpdateDestroyAPIView):
     name = 'itemsale-detail'
     queryset = Itemsale.objects.get_queryset().order_by('id')
     serializer_class = ItemsaleSerializer
+
+    permission_classes = [permissions.IsAuthenticated, 
+    permissions.IsAdminUser | AdministratorPermissions | 
+    ItemsalePermissions]
 
 
 class ApiRoot(GenericAPIView):
@@ -176,12 +232,12 @@ class ApiRoot(GenericAPIView):
             "address": reverse(AddressListView.name, request=request),
             "clients": reverse(ClientListView.name, request=request),
             "administrators": reverse(AdministratorListView.name, request=request),
-            "employee": reverse(EmployeeListView.name, request=request),
+            "employees": reverse(EmployeeListView.name, request=request),
             "status": reverse(StatusListView.name, request=request),
             "genres": reverse(GenreListView.name, request=request),
             "authors": reverse(AuthorListView.name, request=request),
             "books": reverse(BookListView.name, request=request),
-            "write": reverse(WriteListView.name, request=request),
+            "writes": reverse(WriteListView.name, request=request),
             "sales": reverse(SaleListView.name, request=request),
             "itemsales": reverse(ItemsaleListView.name, request=request),
         }

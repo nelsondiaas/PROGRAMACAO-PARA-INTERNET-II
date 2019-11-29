@@ -12,7 +12,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'is_staff']
+        fields = ['url', 'is_superuser', 'username', 'email', 'is_staff']
 
 
 class AddressSerializer(serializers.HyperlinkedModelSerializer):
@@ -66,6 +66,14 @@ class StatusSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Status
         fields = '__all__'
+
+
+class StatusDetailSerializer(serializers.HyperlinkedModelSerializer):
+    message = serializers.CharField(style={'input_type': 'charfild'})
+
+    class Meta:
+        model = Status
+        fields = ['url', 'message']
 
 
 class GenreSerializer(serializers.HyperlinkedModelSerializer):
