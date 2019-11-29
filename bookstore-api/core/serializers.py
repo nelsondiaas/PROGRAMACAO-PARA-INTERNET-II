@@ -26,7 +26,7 @@ class ClientSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = Client
-        fields = ('url', 'name', 'email', 'phone', 'address')
+        fields = ['url', 'name', 'email', 'phone', 'address']
 
     def create(self, validated_data):
         user_created = User.objects.create_user(
@@ -39,10 +39,87 @@ class AdministratorSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Administrator
-        fields = ('url', 'name', 'email', 'cpf', 'salary')
+        fields = ['url', 'name', 'email', 'cpf', 'salary']
 
     def create(self, validated_data):
         user_created = User.objects.create_user(
         username=validated_data['name'].split()[0],
         email=validated_data['email'], password='admin@123')
         return Administrator.objects.create(user=user_created, **validated_data)
+
+
+class EmployeeSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Employee
+        fields = ['url', 'name', 'email', 'cpf', 'salary', 'administrator']
+
+    def create(self, validated_data):
+        user_created = User.objects.create_user(
+        username=validated_data['name'].split()[0],
+        email=validated_data['email'], password='admin@123')
+        return Employee.objects.create(user=user_created, **validated_data)
+
+
+class StatusSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Status
+        fields = '__all__'
+
+
+class GenreSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Genre
+        fields = '__all__'
+
+
+class AuthorSerializer(serializers.HyperlinkedModelSerializer):
+    
+    class Meta:
+        model = Author
+        fields = '__all__'
+
+
+class WriteSerializer(serializers.HyperlinkedModelSerializer):
+
+     class Meta:
+        model = Write
+        fields = '__all__'
+
+
+class BookSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Book
+        fields = '__all__'
+    
+
+class SaleSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Sale
+        fields = ['url', 'client', 'employee', 'status', 'total', 'date_created']
+
+
+class SaleDetailSerializer(serializers.HyperlinkedModelSerializer):
+    total = serializers.FloatField(style={'input_type': 'interger'})
+
+    class Meta:
+        model = Sale
+        fields = ['url', 'client', 'employee', 'status', 'total', 'date_created']
+
+
+class ItemsaleSerializer(serializers.HyperlinkedModelSerializer):
+    
+    class Meta:
+        model = Itemsale
+        fields = ['url', 'book', 'amount', 'subtotal', 'sale']
+
+    def create(self, validated_data):
+        item_sale = Itemsale.objects.create(**validated_data)
+        item_sale.calc_amount
+        item_sale.sub_stock
+        item_sale.add_total_sale
+        return item_sale
