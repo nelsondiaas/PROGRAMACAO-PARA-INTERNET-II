@@ -40,7 +40,7 @@ class AdministratorSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Administrator
         fields = ['url', 'name', 'email', 'cpf', 'salary']
-
+    
     def create(self, validated_data):
         user_created = User.objects.create_user(
         username=validated_data['name'].split()[0],
