@@ -172,7 +172,7 @@ class BookDetail(RetrieveUpdateDestroyAPIView):
         instance = Book.objects.get(pk=kwargs['pk'])
         title_old, prince_old, = instance.title, float(instance.prince)
         title_new, prince_new = request.data['title'], float(request.data['prince'])
-
+        
         if (request.user.is_superuser or len(Administrator.objects.filter(
             email=request.user.email))):
             return super().put(request, *args, **kwargs)
@@ -183,15 +183,22 @@ class BookDetail(RetrieveUpdateDestroyAPIView):
             return super().put(request, *args, **kwargs)
         return Response({'error':"Only admin or administrator can perform this operation. "},
         status = status.HTTP_401_UNAUTHORIZED)
-            
+
+    def delete(self, request, *args, **kwargs):
+        is_employee = Employee.objects.filter(email=request.user.email)
         
+        if not len(is_employee):
+            return super().put(request, *args, **kwargs)
+        return Response({'error':"Only admin or administrator can perform this operation. "},
+        status = status.HTTP_401_UNAUTHORIZED)
+        
+
 class SaleListView(ListCreateAPIView):
     name = 'sale-list-view'
     queryset = Sale.objects.get_queryset().order_by('id')
     serializer_class = SaleSerializer
 
-    permission_classes = [permissions.IsAuthenticated, 
-    permissions.IsAdminUser | AdministratorPermissions | 
+    permission_classes = [permissions.IsAuthenticated, AdministratorPermissions | 
     SalePermissions]
 
 
@@ -200,8 +207,7 @@ class SaleDetail(RetrieveUpdateDestroyAPIView):
     queryset = Sale.objects.get_queryset().order_by('id')
     serializer_class = SaleDetailSerializer
 
-    permission_classes = [permissions.IsAuthenticated, 
-    permissions.IsAdminUser | AdministratorPermissions | 
+    permission_classes = [permissions.IsAuthenticated, AdministratorPermissions | 
     SalePermissions]
 
 
@@ -210,19 +216,34 @@ class ItemsaleListView(ListCreateAPIView):
     queryset = Itemsale.objects.get_queryset().order_by('id')
     serializer_class = ItemsaleSerializer
 
-    permission_classes = [permissions.IsAuthenticated, 
-    permissions.IsAdminUser | AdministratorPermissions | 
+    permission_classes = [permissions.IsAuthenticated, AdministratorPermissions | 
     ItemsalePermissions]
 
+    def post(self, request, *args, **kwargs):
+        pk_sale = request.data['sale'][27:].split('/')[1]
+        sale = Sale.objects.get(pk=pk_sale)
 
+        if sale.get_status == "Compra Finalizada":
+            return Response({'error':"The status of this sale is finalized."},
+            status = status.HTTP_401_UNAUTHORIZED)
+        return super().post(request, *args, **kwargs)
+
+    
 class ItemsaleDetail(RetrieveUpdateDestroyAPIView):
     name = 'itemsale-detail'
     queryset = Itemsale.objects.get_queryset().order_by('id')
     serializer_class = ItemsaleSerializer
 
-    permission_classes = [permissions.IsAuthenticated, 
-    permissions.IsAdminUser | AdministratorPermissions | 
+    permission_classes = [permissions.IsAuthenticated, AdministratorPermissions | 
     ItemsalePermissions]
+
+    def put(self, request, *args, **kwargs):
+        item_sale = Itemsale.objects.get(pk=kwargs['pk'])
+
+        if item_sale.get_status == "Compra Finalizada":
+            return Response({'error':"The status of this sale is finalized."},
+            status = status.HTTP_401_UNAUTHORIZED)
+        return super().post(request, *args, **kwargs)
 
 
 class ApiRoot(GenericAPIView):

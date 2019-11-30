@@ -79,6 +79,10 @@ class Sale(models.Model):
         return "Client: {}, Employee: {}, Total: $ {}, Status: {}".format(
         self.client.name, self.employee.name, self.total, self.status.message)
     
+    @property
+    def get_status(self):
+        return self.status.message
+
 
 class Author(models.Model):
     name = models.CharField(max_length=60)
@@ -143,3 +147,7 @@ class Itemsale(models.Model):
     def add_total_sale(self):
         self.sale.total += self.subtotal
         self.sale.save()
+
+    @property
+    def get_status(self):
+        return self.sale.status.message

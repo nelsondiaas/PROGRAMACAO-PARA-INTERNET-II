@@ -40,7 +40,7 @@ class AdministratorSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Administrator
         fields = ['url', 'name', 'email', 'cpf', 'salary']
-    
+
     def create(self, validated_data):
         user_created = User.objects.create_user(
         username=validated_data['name'].split()[0],
@@ -127,6 +127,10 @@ class ItemsaleSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         item_sale = Itemsale.objects.create(**validated_data)
+        '''
+        if item_sale.amount > item_sale.book.stock:
+            raise serializers.ValidationError("Error: insufficient stock to perform this operation")
+        '''
         item_sale.calc_amount
         item_sale.sub_stock
         item_sale.add_total_sale
