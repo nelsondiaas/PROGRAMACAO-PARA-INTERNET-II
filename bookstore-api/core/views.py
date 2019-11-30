@@ -246,6 +246,22 @@ class ItemsaleDetail(RetrieveUpdateDestroyAPIView):
         return super().post(request, *args, **kwargs)
 
 
+class AdministratorEmployeeList(ListAPIView):
+    name = 'administrator-employee-list'
+    queryset = Administrator.objects.get_queryset().order_by('id')
+    serializer_class = AdministratorEmployeeList
+    
+    search_fields = ['^name', '^email', '^salary']
+    ordering_fields = ['name', 'salary']
+    filter_fields = ['name', 'email', 'salary']
+   
+
+class AdministratorEmployeeDetail(ListAPIView):
+    name = 'administrator-employee-detail'
+    queryset = Administrator.objects.get_queryset().order_by('id')
+    serializer_class = AdministratorEmployeeList
+
+
 class ApiRoot(GenericAPIView):
     name = 'api-root'
 
@@ -265,6 +281,7 @@ class ApiRoot(GenericAPIView):
             "writes": reverse(WriteListView.name, request=request),
             "sales": reverse(SaleListView.name, request=request),
             "itemsales": reverse(ItemsaleListView.name, request=request),
+            "administrators-employees": reverse(AdministratorEmployeeList.name, request=request)
         }
         
         return Response(data, status=status.HTTP_200_OK)

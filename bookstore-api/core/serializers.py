@@ -135,3 +135,10 @@ class ItemsaleSerializer(serializers.HyperlinkedModelSerializer):
         item_sale.sub_stock
         item_sale.add_total_sale
         return item_sale
+
+class AdministratorEmployeeList(serializers.HyperlinkedModelSerializer):
+    employees = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name="employee-detail")
+    
+    class Meta:
+        model = Administrator
+        fields = ['url', 'name', 'email', 'cpf', 'salary', 'employees']
