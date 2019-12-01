@@ -102,7 +102,41 @@ class BookSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Book
         fields = '__all__'
-    
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        book_pk = request.parser_context.get('kwargs')['pk']
+
+        book = Book.objects.get(pk=book_pk)
+
+        title_old = book.title
+        prince_old = float(book.prince)
+        genre_old = book.genre
+        title_new = validated_data.get('title')
+        prince_new = validated_data.get('prince')
+        genre_new = validated_data.get('genre')
+
+        is_administrator = Administrator.objects.filter(email=request.user.email).exists()
+        is_employee = Employee.objects.filter(email=request.user.email).exists()
+
+        if request.user.is_superuser or is_administrator:
+            instance.title = validated_data.get('title', instance.title)
+            instance.stock = validated_data.get('stock', instance.stock)
+            instance.prince = validated_data.get('prince', instance.prince)
+            instance.genre = validated_data.get('genre', instance.genre)
+            instance.save()
+            return instance
+
+        if (is_employee and (title_old == title_new) and 
+            (prince_old == prince_new) and 
+            (genre_old == genre_new)):
+            instance.stock = validated_data.get('stock', instance.stock)
+            instance.save()
+            return instance
+            
+        raise serializers.ValidationError(
+        "Error: Only admin or administrator can perform this operation")
+
 
 class SaleSerializer(serializers.HyperlinkedModelSerializer):
 
@@ -167,7 +201,7 @@ class ItemsaleSerializer(serializers.HyperlinkedModelSerializer):
         
         item_sale.sub_total_sale
         item_sale.add_stock
-        
+
         instance.amount = validated_data.get('amount', instance.amount)
 
         instance.calc_amount

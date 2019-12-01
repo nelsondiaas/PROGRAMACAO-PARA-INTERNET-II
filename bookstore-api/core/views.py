@@ -178,31 +178,16 @@ class BookDetail(RetrieveUpdateDestroyAPIView):
 
     permission_classes = [
     permissions.IsAuthenticated, AdministratorPermissions | BookPermission]
-
-    def put(self, request, *args, **kwargs):
-        instance = Book.objects.get(pk=kwargs['pk'])
-        title_old, prince_old, = instance.title, float(instance.prince)
-        title_new, prince_new = request.data['title'], float(request.data['prince'])
-        
-        if (request.user.is_superuser or len(Administrator.objects.filter(
-            email=request.user.email))):
-            return super().put(request, *args, **kwargs)
-
-        is_employee = Employee.objects.filter(email=request.user.email)
-       
-        if (len(is_employee) and (title_old == title_new) and (prince_old == prince_new)):
-            return super().put(request, *args, **kwargs)
-        return Response({'error':"Only admin or administrator can perform this operation. "},
-        status = status.HTTP_401_UNAUTHORIZED)
-
+    
     def delete(self, request, *args, **kwargs):
-        is_employee = Employee.objects.filter(email=request.user.email)
+        is_employee = Employee.objects.filter(email=request.user.email).exists()
         
-        if not len(is_employee):
-            return super().put(request, *args, **kwargs)
-        return Response({'error':"Only admin or administrator can perform this operation. "},
+        if not is_employee:
+            return super().delete(request, *args, **kwargs)
+        return Response({
+        'error':"Only admin or administrator can perform this operation. "},
         status = status.HTTP_401_UNAUTHORIZED)
-        
+    
 
 class SaleListView(ListCreateAPIView):
     name = 'sale-list-view'
