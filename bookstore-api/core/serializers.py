@@ -126,19 +126,64 @@ class ItemsaleSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'book', 'amount', 'subtotal', 'sale']
 
     def create(self, validated_data):
-        item_sale = Itemsale.objects.create(**validated_data)
-        '''
-        if item_sale.amount > item_sale.book.stock:
+        stock = validated_data['book'].stock
+        amount = validated_data['amount']
+        status = validated_data['sale'].status.message
+        
+        if amount > stock:
             raise serializers.ValidationError("Error: insufficient stock to perform this operation")
-        '''
+        
+        if amount < 0:
+            raise serializers.ValidationError("Error: Negative amount detected")
+        
+        if status == "Compra Finalizada":
+            raise serializers.ValidationError("Error: The status of this sale is finalized")
+
+        item_sale = Itemsale.objects.create(**validated_data)
+
         item_sale.calc_amount
         item_sale.sub_stock
         item_sale.add_total_sale
         return item_sale
 
-class AdministratorEmployeeList(serializers.HyperlinkedModelSerializer):
+    def update(self, instance, validated_data):
+        status = validated_data['sale'].status.message
+        sale = validated_data['sale']
+        book = validated_data['book']
+
+        request = self.context.get('request')
+        item_sale_pk = request.parser_context.get('kwargs')['pk']
+        
+        item_sale = Itemsale.objects.get(pk=item_sale_pk)
+
+        if status == "Compra Finalizada":
+            raise serializers.ValidationError("Error: The status of this sale is finalized")
+        
+        if item_sale.book != book:
+            raise serializers.ValidationError("Error: You cannot update with a different book")
+        
+        if item_sale.sale != sale:
+            raise serializers.ValidationError("You cannot update with a different sale")
+        
+        item_sale.sub_total_sale
+        item_sale.add_stock
+        
+        instance.amount = validated_data.get('amount', instance.amount)
+
+        instance.calc_amount
+        instance.sub_stock
+        instance.add_total_sale
+
+        instance.save()
+
+        return instance
+
+       
+class AdministratorEmployeeSerializer(serializers.HyperlinkedModelSerializer):
     employees = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name="employee-detail")
-    
+
     class Meta:
         model = Administrator
         fields = ['url', 'name', 'email', 'cpf', 'salary', 'employees']
+
+    

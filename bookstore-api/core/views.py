@@ -15,6 +15,7 @@ class UserListView(ListAPIView):
 
     permission_classes = [permissions.IsAdminUser]
 
+    search_fields = ['^username']
 
 class UserDetail(RetrieveUpdateDestroyAPIView):
     name = "user-detail"
@@ -30,6 +31,8 @@ class ClientListView(ListCreateAPIView):
     serializer_class = ClientSerializer
 
     permission_classes = [permissions.IsAuthenticated, ClientPermissions]
+
+    search_fields = ['^name', '^email']
 
 
 class ClientDetail(RetrieveUpdateDestroyAPIView):
@@ -127,6 +130,10 @@ class AuthorListView(ListCreateAPIView):
 
     permission_classes = [permissions.IsAuthenticated, AdministratorPermissions]
 
+    search_fields = ['^name', '^email']
+    ordering_fields = ['name', 'email']
+    filter_fields = ['name', 'email']
+
 
 class AuthorDetail(RetrieveUpdateDestroyAPIView):
     name = 'author-detail'
@@ -158,6 +165,10 @@ class BookListView(ListCreateAPIView):
     serializer_class = BookSerializer
 
     permission_classes = [permissions.IsAuthenticated, AdministratorPermissions]
+
+    search_fields = ['^title', '^genre']
+    ordering_fields = ['title', 'genre']
+    filter_fields = ['title', 'genre']
 
 
 class BookDetail(RetrieveUpdateDestroyAPIView):
@@ -201,6 +212,9 @@ class SaleListView(ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated, AdministratorPermissions | 
     SalePermissions]
 
+    search_fields = ['^client', '^employee']
+    ordering_fields = ['total']
+
 
 class SaleDetail(RetrieveUpdateDestroyAPIView):
     name = 'sale-detail'
@@ -219,15 +233,6 @@ class ItemsaleListView(ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated, AdministratorPermissions | 
     ItemsalePermissions]
 
-    def post(self, request, *args, **kwargs):
-        pk_sale = request.data['sale'][27:].split('/')[1]
-        sale = Sale.objects.get(pk=pk_sale)
-
-        if sale.get_status == "Compra Finalizada":
-            return Response({'error':"The status of this sale is finalized."},
-            status = status.HTTP_401_UNAUTHORIZED)
-        return super().post(request, *args, **kwargs)
-
     
 class ItemsaleDetail(RetrieveUpdateDestroyAPIView):
     name = 'itemsale-detail'
@@ -237,20 +242,14 @@ class ItemsaleDetail(RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated, AdministratorPermissions | 
     ItemsalePermissions]
 
-    def put(self, request, *args, **kwargs):
-        item_sale = Itemsale.objects.get(pk=kwargs['pk'])
-
-        if item_sale.get_status == "Compra Finalizada":
-            return Response({'error':"The status of this sale is finalized."},
-            status = status.HTTP_401_UNAUTHORIZED)
-        return super().post(request, *args, **kwargs)
-
 
 class AdministratorEmployeeList(ListAPIView):
     name = 'administrator-employee-list'
     queryset = Administrator.objects.get_queryset().order_by('id')
-    serializer_class = AdministratorEmployeeList
-    
+    serializer_class = AdministratorEmployeeSerializer
+
+    permission_classes = [permissions.IsAdminUser]
+
     search_fields = ['^name', '^email', '^salary']
     ordering_fields = ['name', 'salary']
     filter_fields = ['name', 'email', 'salary']
@@ -259,7 +258,9 @@ class AdministratorEmployeeList(ListAPIView):
 class AdministratorEmployeeDetail(ListAPIView):
     name = 'administrator-employee-detail'
     queryset = Administrator.objects.get_queryset().order_by('id')
-    serializer_class = AdministratorEmployeeList
+    serializer_class = AdministratorEmployeeSerializer
+
+    permission_classes = [permissions.IsAdminUser]
 
 
 class ApiRoot(GenericAPIView):

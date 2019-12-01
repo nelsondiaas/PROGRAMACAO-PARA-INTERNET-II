@@ -144,8 +144,18 @@ class Itemsale(models.Model):
         self.book.save()
 
     @property
+    def add_stock(self):
+        self.book.stock += self.amount
+        self.book.save()
+    
+    @property
     def add_total_sale(self):
         self.sale.total += self.subtotal
+        self.sale.save()
+
+    @property
+    def sub_total_sale(self):
+        self.sale.total -= self.subtotal
         self.sale.save()
 
     @property
