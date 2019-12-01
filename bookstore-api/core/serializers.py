@@ -27,8 +27,11 @@ class ClientSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Client
         fields = ['url', 'name', 'email', 'phone', 'address']
-
+    
     def create(self, validated_data):
+        if Client.objects.filter(email=validated_data['email']).exists():
+            raise serializers.ValidationError("Error: This email already exists")
+
         user_created = User.objects.create_user(
         username=validated_data['name'].split()[0],
         email=validated_data['email'], password='admin@123')
@@ -42,6 +45,9 @@ class AdministratorSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'name', 'email', 'cpf', 'salary']
 
     def create(self, validated_data):
+        if Administrator.objects.filter(email=validated_data['email']).exists():
+            raise serializers.ValidationError("Error: This email already exists")
+
         user_created = User.objects.create_user(
         username=validated_data['name'].split()[0],
         email=validated_data['email'], password='admin@123', is_staff=True)
@@ -55,6 +61,9 @@ class EmployeeSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'name', 'email', 'cpf', 'salary', 'administrator']
 
     def create(self, validated_data):
+        if Employee.objects.filter(email=validated_data['email']).exists():
+            raise serializers.ValidationError("Error: This email already exists")
+
         user_created = User.objects.create_user(
         username=validated_data['name'].split()[0],
         email=validated_data['email'], password='admin@123', is_staff=True)

@@ -1,11 +1,39 @@
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.generics import *
 from .permissions import *
 from .serializers import *
 
 User = get_user_model()
+
+
+class ApiRoot(GenericAPIView):
+    name = 'api-root'
+
+    def get(self, request, *args, **kwargs):
+
+        data = {
+            
+            "users": reverse(UserListView.name, request=request),
+            "address": reverse(AddressListView.name, request=request),
+            "clients": reverse(ClientListView.name, request=request),
+            "administrators": reverse(AdministratorListView.name, request=request),
+            "employees": reverse(EmployeeListView.name, request=request),
+            "status": reverse(StatusListView.name, request=request),
+            "genres": reverse(GenreListView.name, request=request),
+            "authors": reverse(AuthorListView.name, request=request),
+            "books": reverse(BookListView.name, request=request),
+            "writes": reverse(WriteListView.name, request=request),
+            "sales": reverse(SaleListView.name, request=request),
+            "itemsales": reverse(ItemsaleListView.name, request=request),
+            "administrators-employees": reverse(AdministratorEmployeeList.name, request=request),
+            "reports-employess": reverse(ReportEmployee.name, request=request),
+            "reports-clients": reverse(ReportClient.name, request=request),
+        }
+        
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class UserListView(ListAPIView):
@@ -248,26 +276,131 @@ class AdministratorEmployeeDetail(ListAPIView):
     permission_classes = [permissions.IsAdminUser]
 
 
-class ApiRoot(GenericAPIView):
-    name = 'api-root'
+class ReportEmployee(APIView):
+    name = 'report-employee'
+    
+    permission_classes = [permissions.IsAuthenticated, ReportPermissions]
 
-    def get(self, request, *args, **kwargs):
-
-        data = {
-            
-            "users": reverse(UserListView.name, request=request),
-            "address": reverse(AddressListView.name, request=request),
-            "clients": reverse(ClientListView.name, request=request),
-            "administrators": reverse(AdministratorListView.name, request=request),
-            "employees": reverse(EmployeeListView.name, request=request),
-            "status": reverse(StatusListView.name, request=request),
-            "genres": reverse(GenreListView.name, request=request),
-            "authors": reverse(AuthorListView.name, request=request),
-            "books": reverse(BookListView.name, request=request),
-            "writes": reverse(WriteListView.name, request=request),
-            "sales": reverse(SaleListView.name, request=request),
-            "itemsales": reverse(ItemsaleListView.name, request=request),
-            "administrators-employees": reverse(AdministratorEmployeeList.name, request=request)
-        }
+    def get(self, request, format=None):
+        employees = Employee.objects.all()
         
-        return Response(data, status=status.HTTP_200_OK)
+        _list = []
+
+        for employee in employees:
+            new_list = {}
+
+            new_list['url'] = reverse('employee-detail', args=
+            [Employee.objects.get(pk=employee.pk).id],request=request)
+            
+            new_list['name'] = employee.name 
+
+            sales = Sale.objects.filter(employee=employee)
+            
+            new_list['money_books_shopping'] = 0.0
+            new_list['books_shopping'] = 0
+            new_list['count_clients'] = 0
+            new_list['clients'] = []
+
+            for sale in sales:
+                client_list = {} 
+
+                client_list['url'] = reverse('client-detail', args=
+                [Client.objects.get(pk=sale.client.pk).id],request=request)
+
+                client_list['name'] = sale.client.name
+                client_list['shopping'] = []
+
+                sale_list = {}
+
+                sale_list['url'] = reverse('sale-detail', args=
+                [Sale.objects.get(pk=sale.pk).id],request=request)
+
+                sale_list['employee'] = reverse('employee-detail', args=
+                [Employee.objects.get(pk=sale.employee.pk).id],request=request)
+
+                sale_list['total'] = sale.total
+                sale_list['status'] = sale.status.message
+                sale_list['date_created'] = sale.date_created
+
+                sale_list['books'] = []
+
+                items_sales = Itemsale.objects.filter(sale=sale)
+
+                for item_sale in items_sales:
+                    book = {}
+
+                    book['url'] = reverse('book-detail', args=
+                    [Book.objects.get(pk=item_sale.book.pk).id],request=request)
+
+                    book['title'] = item_sale.book.title
+                    book['amount'] = item_sale.amount
+                    book['subtotal'] = item_sale.subtotal
+
+                    sale_list['books'].append(book)
+
+                    if sale_list['status'] == "Compra Finalizada":
+                        new_list['books_shopping'] += book['amount']
+                        new_list['money_books_shopping'] += book['subtotal'] 
+
+                client_list['shopping'].append(sale_list)
+                new_list['clients'].append(client_list)
+            
+            new_list['count_clients'] += len(new_list['clients'])
+
+            _list.append(new_list)
+
+        return Response(_list, status=status.HTTP_200_OK)
+
+
+class ReportClient(APIView):
+    name = 'report-client'
+    
+    permission_classes = [permissions.IsAuthenticated, ReportPermissions]
+
+    def get(self, request, format=None):
+        sales = Sale.objects.all()
+
+        _list = []
+
+        for sale in sales:
+            client_list = {}
+            
+            client_list['url'] = reverse('client-detail', args=
+            [Client.objects.get(pk=sale.client.pk).id],request=request)
+            
+            client_list['name'] = sale.client.name
+            client_list['shopping'] = []
+
+            sale_list = {}
+
+            sale_list['url'] = reverse('sale-detail', args=
+            [Sale.objects.get(pk=sale.pk).id],request=request)
+            
+            sale_list['employee'] = reverse('employee-detail', args=
+            [Employee.objects.get(pk=sale.employee.pk).id],request=request)
+            
+            sale_list['total'] = sale.total
+            sale_list['status'] = sale.status.message
+            sale_list['date_created'] = sale.date_created
+
+            sale_list['books'] = []
+
+            items_sales = Itemsale.objects.filter(sale=sale)
+
+            for item_sale in items_sales:
+                book = {}
+
+                book['url'] = reverse('book-detail', args=
+                [Book.objects.get(pk=item_sale.book.pk).id],request=request)
+                
+                book['title'] = item_sale.book.title
+                book['amount'] = item_sale.amount
+                book['subtotal'] = item_sale.subtotal
+
+                sale_list['books'].append(book)
+
+            client_list['shopping'].append(sale_list)
+        
+        _list.append(client_list)
+
+        return Response(_list, status=status.HTTP_200_OK)

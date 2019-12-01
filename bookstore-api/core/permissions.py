@@ -70,3 +70,15 @@ class BookPermission(permissions.BasePermission):
                 return True
         except Employee.DoesNotExist:
             return False
+
+
+class ReportPermissions(permissions.BasePermission):
+    
+    def has_permission(self, request, view):
+        try:
+            if request.user.is_superuser:
+                return True
+            if (Administrator.objects.get(email=request.user.email).user.is_staff):
+                return True
+        except Administrator.DoesNotExist:
+            return False
