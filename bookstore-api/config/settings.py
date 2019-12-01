@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework_swagger',
     'rest_framework',
     'django_filters',
     'core',
@@ -103,7 +104,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-
+    
     'DEFAULT_AUTHENTICATION_CLASSES': 
         ['rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -120,7 +121,13 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter']
     ,
+    'DEFAULT_SCHEMA_CLASS': 
+        'rest_framework.schemas.coreapi.AutoSchema'
+    ,
 }
+
+LOGIN_URL = 'rest_framework:login'
+LOGOUT_URL = 'rest_framework:logout'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

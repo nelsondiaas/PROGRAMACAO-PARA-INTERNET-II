@@ -1,9 +1,14 @@
+from rest_framework_swagger.views import get_swagger_view
 from rest_framework_simplejwt import views as jwt_views
 from django.urls import path, include
 from .views import *
 
+schema_view = get_swagger_view(title='BOOKSTORE API')
+
 
 urlpatterns = [
+
+    path('api-docs/', schema_view),
 
     path('', ApiRoot.as_view(), name=ApiRoot.name),
 
@@ -27,7 +32,7 @@ urlpatterns = [
 
     path('genres/', GenreListView.as_view(), name=GenreListView.name),
     path('genres/<int:pk>/', GenreDetail.as_view(), name=GenreDetail.name),
-
+    
     path('authors/', AuthorListView.as_view(), name=AuthorListView.name),
     path('authors/<int:pk>/', AuthorDetail.as_view(), name=AuthorDetail.name),
 
@@ -49,8 +54,9 @@ urlpatterns = [
     path('reports-employess/', ReportEmployee.as_view(), name=ReportEmployee.name),
     path('reports-clients/', ReportClient.as_view(), name=ReportClient.name),
 
-    path('api-auth/', include('rest_framework.urls')),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api-token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api-token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
     
 ]
+

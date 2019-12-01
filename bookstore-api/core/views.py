@@ -45,6 +45,7 @@ class UserListView(ListAPIView):
 
     search_fields = ['^username']
 
+
 class UserDetail(RetrieveUpdateDestroyAPIView):
     name = "user-detail"
     queryset = User.objects.get_queryset().order_by('id')
@@ -300,7 +301,7 @@ class ReportEmployee(APIView):
             new_list['books_shopping'] = 0
             new_list['count_clients'] = 0
             new_list['clients'] = []
-
+            
             for sale in sales:
                 client_list = {} 
 
