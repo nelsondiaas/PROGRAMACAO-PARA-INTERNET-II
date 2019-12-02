@@ -286,7 +286,7 @@ class ReportEmployee(APIView):
         employees = Employee.objects.all()
         
         _list = []
-
+        
         for employee in employees:
             new_list = {}
 
